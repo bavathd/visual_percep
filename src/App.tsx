@@ -12,11 +12,13 @@ import Egocentric from './pages/egocentric';
 import Topography from './visualTopography';
 import GlobalMotion from './pages/globalMotion';
 import LocalMotion from './pages/localMotion';
+import VisualPerceptionForm from './pages/register';
 
 
 const App = () => {
   const routes = useRoutes([
     { path: '/home', element: <Home /> },
+    { path: '/register', element: <VisualPerceptionForm /> },
     { path: '/va', element: <GameScreen/> },
     { path: '/vm', element: <VisualMemory/> },
     { path: '/vd', element: <VisualDiscrimination/> },

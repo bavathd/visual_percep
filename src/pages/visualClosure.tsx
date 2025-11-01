@@ -64,7 +64,7 @@ const inCorrectImage = [
     ],
     [
       "/level2/shapes/VC+L1+INC+1.png",
-      "/level2/shapes/VC+L1+INC+2.png",
+      "/level2/shapes/VC+L1++INC+2.png",
       "/level2/shapes/VC+L1+INC+3.png"
     ]
   ],

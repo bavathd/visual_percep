@@ -8,7 +8,7 @@ interface GameImage {
     isCorrect: boolean;
 }
 
-const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/spatial";
+const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/vd";
 
 const flashImage = [
   "/level1/objects/VD+TR+S.png",

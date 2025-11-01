@@ -9,120 +9,120 @@ interface GameImage {
     isCorrect: boolean;
 }
 
-const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/vc";
+const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/topography";
 
 const flashImage = [
-  "/level1/objects/VC+TR+S.png",
-  "/level1/shapes/VC+TR+S.png",
-  "/level2/objects/VC+L1+S.png",
-  "/level2/shapes/VC+L1+S.png",
-  "/level3/objects/VC+L2+S.png",
-  "/level3/shapes/VC+L2+S.png",
-  "/level4/objects/VC+L3+S.png",
-  "/level4/shapes/VC+L3+S.png",
-  "/level5/objects/VC+L4+S.png",
-  "/level5/shapes/VC+L4+S.png",
-  "/level6/objects/VC+L5+S.png",
-  "/level6/shapes/VC+L5+S.png"
+  "/level1/objects/TOP+TR+S.png",
+  "/level1/shapes/TOP+TR+S.png",
+  "/level2/objects/TOP+L1+S.png",
+  "/level2/shapes/TOP+L1+S.png",
+  "/level3/objects/TOP+L2+S.png",
+  "/level3/shapes/TOP+L2+S.png",
+  "/level4/objects/TOP+L3+S.png",
+  "/level4/shapes/TOP+L3+S.png",
+  "/level5/objects/TOP+L4+S.png",
+  "/level5/shapes/TOP+L4+S.png",
+  "/level6/objects/TOP+L5+S.png",
+  "/level6/shapes/TOP+L5+S.png"
 ];
 
 const correctImage = [
-  "/level1/objects/VC+TR+CR.png",
-  "/level1/shapes/VC+TR+CR.png",
-  "/level2/objects/VC+L1+CR.png",
-  "/level2/shapes/VC+L1+CR.png",
-  "/level3/objects/VC+L2+CR.png",
-  "/level3/shapes/VC+L2+CR.png",
-  "/level4/objects/VC+L3+CR.png",
-  "/level4/shapes/VC+L3+CR.png",
-  "/level5/objects/VC+L4+CR.png",
-  "/level5/shapes/VC+L4+CR.png",
-  "/level6/objects/VC+L5+CR.png",
-  "/level6/shapes/VC+L5+CR.png"
+  "/level1/objects/TOP+TR+CR.png",
+  "/level1/shapes/TOP+TR+CR.png",
+  "/level2/objects/TOP+L1+CR.png",
+  "/level2/shapes/TOP+L1+CR.png",
+  "/level3/objects/TOP+L2+CR.png",
+  "/level3/shapes/TOP+L2+CR.png",
+  "/level4/objects/TOP+L3+CR.png",
+  "/level4/shapes/TOP+L3+CR.png",
+  "/level5/objects/TOP+L4+CR.png",
+  "/level5/shapes/TOP+L4+CR.png",
+  "/level6/objects/TOP+L5+CR.png",
+  "/level6/shapes/TOP+L5+CR.png"
 ];
 
 const inCorrectImage = [
   [
     // Level 1
     [
-      "/level1/objects/VC+TR+INC+1.png",
-      "/level1/objects/VC+TR+INC+2.png",
-      "/level1/objects/VC+TR+INC+3.png"
+      "/level1/objects/TOP+TR+INC+1.png",
+      "/level1/objects/TOP+TR+INC+2.png",
+      "/level1/objects/TOP+TR+INC+3.png"
     ],
     [
-      "/level1/shapes/VC+TR+INC+1.png",
-      "/level1/shapes/VC+TR+INC+2.png",
-      "/level1/shapes/VC+TR+INC+3.png"
+      "/level1/shapes/TOP+TR+INC+1.png",
+      "/level1/shapes/TOP+TR+INC+2.png",
+      "/level1/shapes/TOP+TR+INC+3.png"
     ]
   ],
   [
     // Level 2
     [
-      "/level2/objects/VC+L1+INC+1.png",
-      "/level2/objects/VC+L1+INC+2.png",
-      "/level2/objects/VC+L1+INC+3.png"
+      "/level2/objects/TOP+L1+INC+1.png",
+      "/level2/objects/TOP+L1+INC+2.png",
+      "/level2/objects/TOP+L1+INC+3.png"
     ],
     [
-      "/level2/shapes/VC+L1+INC+1.png",
-      "/level2/shapes/VC+L1+INC+2.png",
-      "/level2/shapes/VC+L1+INC+3.png"
+      "/level2/shapes/TOP+L1+INC+1.png",
+      "/level2/shapes/TOP+L1+INC+2.png",
+      "/level2/shapes/TOP+L1+INC+3.png"
     ]
   ],
   [
     // Level 3
     [
-      "/level3/objects/VC+L2+INC+1.png",
-      "/level3/objects/VC+L2+INC+2.png",
-      "/level3/objects/VC+L2+INC+3.png"
+      "/level3/objects/TOP+L2+INC+1.png",
+      "/level3/objects/TOP+L2+INC+2.png",
+      "/level3/objects/TOP+L2+INC+3.png"
     ],
     [
-      "/level3/shapes/VC+L2+INC+1.png",
-      "/level3/shapes/VC+L2+INC+2.png",
-      "/level3/shapes/VC+L2+INC+3.png"
+      "/level3/shapes/TOP+L2+INC+1.png",
+      "/level3/shapes/TOP+L2+INC+2.png",
+      "/level3/shapes/TOP+L2+INC+3.png"
     ]
   ],
   [
     // Level 4
     [
-      "/level4/objects/VC+L3+INC+1.png",
-      "/level4/objects/VC+L3+INC+2.png",
-      "/level4/objects/VC+L3+INC+3.png"
+      "/level4/objects/TOP+L3+INC+1.png",
+      "/level4/objects/TOP+L3+INC+2.png",
+      "/level4/objects/TOP+L3+INC+3.png"
     ],
     [
-      "/level4/shapes/VC+L3+INC+1.png",
-      "/level4/shapes/VC+L3+INC+2.png",
-      "/level4/shapes/VC+L3+INC+3.png"
+      "/level4/shapes/TOP+L3+INC+1.png",
+      "/level4/shapes/TOP+L3+INC+2.png",
+      "/level4/shapes/TOP+L3+INC+3.png"
     ]
   ],
   [
     // Level 5
     [
-      "/level5/objects/VC+L4+INC+1.png",
-      "/level5/objects/VC+L4+INC+2.png",
-      "/level5/objects/VC+L4+INC+3.png"
+      "/level5/objects/TOP+L4+INC+1.png",
+      "/level5/objects/TOP+L4+INC+2.png",
+      "/level5/objects/TOP+L4+INC+3.png"
     ],
     [
-      "/level5/shapes/VC+L4+INC+1.png",
-      "/level5/shapes/VC+L4+INC+2.png",
-      "/level5/shapes/VC+L4+INC+3.png"
+      "/level5/shapes/TOP+L4+INC+1.png",
+      "/level5/shapes/TOP+L4+INC+2.png",
+      "/level5/shapes/TOP+L4+INC+3.png"
     ]
   ],
   [
     // Level 6
     [
-      "/level6/objects/VC+L5+INC+1.png",
-      "/level6/objects/VC+L5+INC+2.png",
-      "/level6/objects/VC+L5+INC+3.png"
+      "/level6/objects/TOP+L5+INC+1.png",
+      "/level6/objects/TOP+L5+INC+2.png",
+      "/level6/objects/TOP+L5+INC+3.png"
     ],
     [
-      "/level6/shapes/VC+L5+INC+1.png",
-      "/level6/shapes/VC+L5+INC+2.png",
-      "/level6/shapes/VC+L5+INC+3.png"
+      "/level6/shapes/TOP+L5+INC+1.png",
+      "/level6/shapes/TOP+L5+INC+2.png",
+      "/level6/shapes/TOP+L5+INC+3.png"
     ]
   ]
 ];
 
-const VisualClosure:React.FC=()=>{
+const Topography:React.FC=()=>{
     const [level, setLevel] = useState(0);
       const [images, setImages] = useState<GameImage[]>([]);
       const [correct, setCorrect] = useState<number>(0);
@@ -198,7 +198,7 @@ const VisualClosure:React.FC=()=>{
                 </button>
     
                 <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-                Visual Closure
+                Topography
                 </div>
     
                 <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
@@ -245,7 +245,7 @@ const VisualClosure:React.FC=()=>{
             <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex justify-center items-center z-50">
               <div className="bg-white dark:bg-gray-800 text-center rounded-xl shadow-2xl p-6 w-80 mx-4 transform transition-all duration-300">
                 <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
-                  Visual Figure Ground Assessment
+                  Topography Figure Ground Assessment
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 mb-6">
                   Completed Successfully
@@ -270,4 +270,4 @@ const VisualClosure:React.FC=()=>{
         </div>
       );
 }
-export default VisualClosure;
+export default Topography;

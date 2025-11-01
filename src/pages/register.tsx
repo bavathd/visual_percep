@@ -1,12 +1,87 @@
 import { useState } from 'react';
 
+const INDIAN_LANGUAGES: string[] = [
+  "English",
+  "Assamese",
+  "Bengali",
+  "Bodo",
+  "Dogri",
+  "Gujarati",
+  "Hindi",
+  "Kannada",
+  "Kashmiri",
+  "Konkani",
+  "Maithili",
+  "Malayalam",
+  "Manipuri (Meitei)",
+  "Marathi",
+  "Nepali",
+  "Odia",
+  "Punjabi",
+  "Sanskrit",
+  "Santali",
+  "Sindhi",
+  "Tamil",
+  "Telugu",
+  "Urdu"
+];
+
 const VisualPerceptionForm = () => {
   const [dob, setDob] = useState('');
   const [age, setAge] = useState('');
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bmi, setBmi] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState("")
+  const [customLanguage, setCustomLanguage] = useState<string>("");
+  const [Reading, setReading] = useState("")
+  const [customReading, setCustomReading] = useState<string>("");  
+  const [Writing, setWriting] = useState("")
+  const [customWriting, setCustomWriting] = useState<string>("");
 
+  const handleLanguage = (e: React.ChangeEvent<HTMLSelectElement>)=>{
+     const value = e.target.value;
+   if (value !== "Others") {
+    setSelectedLanguage(value);
+    setCustomLanguage(""); // clear any previous custom input
+  } else {
+    setSelectedLanguage("Others"); // show text box for custom entry
+  }
+  }
+  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const customValue = e.target.value;
+    setCustomLanguage(customValue);
+  };
+
+    const handleReading = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value !== "Others") {
+      setReading(value);
+      setCustomReading("");
+    } else {
+      setReading("Others");
+    }
+  };
+
+  const handleCustomReading = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const customValue = e.target.value;
+    setCustomReading(customValue);
+  };
+
+  const handleWriting = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value !== "Others") {
+      setWriting(value);
+      setCustomWriting("");
+    } else {
+      setWriting("Others");
+    }
+  };
+
+  const handleCustomWriting = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const customValue = e.target.value;
+    setCustomWriting(customValue);
+  };
   const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
     const today = new Date();
@@ -63,7 +138,7 @@ const VisualPerceptionForm = () => {
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                1. Personal Details
+                1. Demographic Profile
               </h2>
             </div>
             <div className="p-6 space-y-4">
@@ -118,14 +193,158 @@ const VisualPerceptionForm = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Primary Language *</label>
-                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Medium of Instruction in School *</label>
+                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value={selectedLanguage}
+                    onChange={handleLanguage}
+                >
                   <option value="">Select primary language</option>
-                  <option value="english">English</option>
-                  <option value="hindi">Hindi</option>
-                  <option value="tamil">Tamil</option>
-                  <option value="other">Other</option>
-                </select>
+                    {INDIAN_LANGUAGES.map((lang) =>
+                    (
+                      <option value={lang}>{lang}</option>
+                    ))
+                    }
+                    <option value="Others">Other</option>
+                  </select>
+                  {selectedLanguage === 'Others' && (
+                    <input 
+                      type="text" 
+                      id="language"
+                      value={customLanguage} 
+                      onChange={handleCustomChange}
+                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">language Comprehension in Reading *</label>
+                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value={Reading}
+                    onChange={handleReading}
+                >
+                  <option value="">Select primary language</option>
+                    {INDIAN_LANGUAGES.map((lang) =>
+                    (
+                      <option value={lang}>{lang}</option>
+                    ))
+                    }
+                    <option value="Others">Other</option>
+                  </select>
+                  {Reading === 'Others' && (
+                    <input 
+                      type="text" 
+                      id="language"
+                      value={customReading} 
+                      onChange={handleCustomReading}
+                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">language Comprehension in Writing *</label>
+                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value={Writing}
+                    onChange={handleWriting}
+                >
+                  <option value="">Select primary language</option>
+                    {INDIAN_LANGUAGES.map((lang) =>
+                    (
+                      <option value={lang}>{lang}</option>
+                    ))
+                    }
+                    <option value="Others">Other</option>
+                  </select>
+                  {Writing === 'Others' && (
+                    <input 
+                      type="text" 
+                      id="language"
+                      value={customWriting} 
+                      onChange={handleCustomWriting}
+                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+              </div>
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="font-semibold text-form-header mb-3">Physical Information</h4>
+                <div className="grid md:grid-cols-2 gap-4"></div>
+                <div className="space-y-2">
+                  <label htmlFor="height" className="block text-sm font-medium text-gray-700">Height (cm) *</label>
+                  <input 
+                    type="number" 
+                    id="height"
+                    placeholder="Height in cm"
+                    value={height} 
+                    onChange={(e) => { setHeight(e.target.value); calculateBMI(); }}
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Weight (kg) *</label>
+                  <input 
+                    type="number" 
+                    id="weight"
+                    placeholder="Weight in kg"
+                    value={weight} 
+                    onChange={(e) => { setWeight(e.target.value); calculateBMI(); }}
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">BMI</label>
+                  <div className="p-3 bg-accent-light rounded-md border">
+                    {bmi && (
+                      <div className="flex flex-col gap-1">
+                        <span className="inline-block px-2 py-1 bg-gray-100 border rounded text-sm font-medium">
+                          BMI: {bmi}
+                        </span>
+                        <span className={`inline-block px-2 py-1 rounded text-xs text-white ${getBMICategory(parseFloat(bmi)).color}`}>
+                          {getBMICategory(parseFloat(bmi)).category}
+                        </span>
+                      </div>
+                    )}
+                    {!bmi && <span className="text-muted-foreground text-sm">Enter height & weight</span>}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="visionStatus" className="block text-sm font-medium text-gray-700">Vision Status</label>
+                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select vision status</option>
+                    <option value="normal">Normal</option>
+                    <option value="not Assessed yet">Needs Checkup</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Visual Aids</label>
+                  <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
+                    <input type="checkbox" id="glasses" className="text-primary" />
+                    <label htmlFor="glasses" className="text-sm">Wears Glasses</label>
+                    <input type="checkbox" id="contact lenses" className="text-primary" />
+                    <label htmlFor="contact lenses" className="text-sm">Wears Contact Lenses</label>
+                    <input type="checkbox" id="others" className="text-primary" />
+                    <label htmlFor="others" className="text-sm">others</label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="visionStatus" className="block text-sm font-medium text-gray-700">Hearing Status</label>
+                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select vision status</option>
+                    <option value="normal">Normal</option>
+                    <option value="not Assessed yet">Needs Checkup</option>
+                    <option value="unknown">Unknown</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Visual Aids</label>
+                  <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
+                    <input type="checkbox" id="glasses" className="text-primary" />
+                    <label htmlFor="glasses" className="text-sm">Wears Glasses</label>
+                    <input type="checkbox" id="glasses" className="text-primary" />
+                    <label htmlFor="glasses" className="text-sm">Wears Contact Lenses</label>
+                    <input type="checkbox" id="glasses" className="text-primary" />
+                    <label htmlFor="glasses" className="text-sm">others</label>
+                  </div>
+                </div>
               </div>
 
               <div className="border-t border-gray-200 pt-4">

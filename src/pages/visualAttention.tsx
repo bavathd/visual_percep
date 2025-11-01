@@ -8,84 +8,112 @@ interface GameImage {
   src: string;
   clicked: boolean;
   isCorrect: boolean;
+  size:number;
 }
 
 // Move constants outside component to avoid recreating them on every render
 
 const CORRECT_IMAGES = [
-  "VA TR S.png", // level 0 (training)
-  "VA L1 S.png",
-  "VA L2 S1.png",
-  "VA L3 S1.png",
-  "VA L4 S.png",
-  "VA L5 S.png",
+  "VA+TR+S.png", // level 0 (training)
+  "VA+L1+S.png",
+  "VA+L2+S.png",
+  "VA+L3+S.png",
+  "VA+L4+S.png",
+  "VA+L5+S.png",
 ];
 
 const INCORRECT_IMAGES = [
-  [], // for level 0
-  [], // for level 1
-  ["VA L2 S2.png"],
-  ["VA L3 S2.png", "VA L3 S3.png"],
-  ["VA L4 S2.png", "VA L4 S3.png", "VA L4 S4.png"],
-  ["VA L5 S2.png", "VA L5 S3.png", "VA L5 S4.png", "VA L5 S5.png"],
+  ["VA+TR+S0.png"], // for level 0
+  ["VA+L1+S0.png"], // for level 1
+  ["VA+L2+S0.png"],
+  ["VA+L3+S0.png"],
+  ["VA+L4+S0.png"],
+  ["VA+L5+S0.png"],
 ];
 
-const NUMBER_OF_CORRECT = [5, 10, 10, 6, 7, 6];
-const TOTAL_IMAGES = [5, 10, 25, 25, 25, 25];
+const NUMBER_OF_CORRECT = [1, 1, 1, 1, 1, 1];
+const TOTAL_IMAGES = [25, 24, 25, 25, 25, 25];
+
 
 const GameScreen: React.FC = () => {
   const [level, setLevel] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const url = "https://visualperceptiondomain.s3.ap-south-1.amazonaws.com/game-assets/visualAttention/";
+  //const url = "https://visualperceptiondomain.s3.ap-south-1.amazonaws.com/game-assets/visualAttention/";
+  const url = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/visualAttention/";
 
   const [correct, setCorrect] = useState<number>(1);
   const [images, setImages] = useState<GameImage[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const generateUniquePositions = (count: number): { top: number; left: number }[] => {
-      const positions: { top: number; left: number }[] = [];
+useEffect(() => {
+  const generateUniquePositions = (count: number): { top: number; left: number }[] => {
+    const positions: { top: number; left: number }[] = [];
+    while (positions.length < count) {
+      const top = Math.floor(Math.random() * 80);
+      const left = Math.floor(Math.random() * 95);
+      const tooClose = positions.some(
+        pos => Math.abs(pos.top - top) < 12 && Math.abs(pos.left - left) < 12
+      );
+      if (!tooClose) positions.push({ top, left });
+    }
+    return positions;
+  };
 
-      while (positions.length < count) {
-        const top = Math.floor(Math.random() * 80);
-        const left = Math.floor(Math.random() * 95);
+  const correctCount = NUMBER_OF_CORRECT[level] || 1;
+  const totalImages = TOTAL_IMAGES[level] || 25;
 
-        const tooClose = positions.some(
-          pos => Math.abs(pos.top - top) < 12 && Math.abs(pos.left - left) < 12
-        );
+  const positions = generateUniquePositions(totalImages);
 
-        if (!tooClose) positions.push({ top, left });
-      }
+  // ✅ Randomly pick which ones will be correct
+  const correctIndexes = new Set<number>();
+  while (correctIndexes.size < correctCount) {
+    correctIndexes.add(Math.floor(Math.random() * totalImages));
+  }
 
-      return positions;
-    };
+  const correctImage = CORRECT_IMAGES[level];
+  const incorrectList = INCORRECT_IMAGES[level] || [];
 
-    const positions = generateUniquePositions(TOTAL_IMAGES[level]);
-    const correctIndexes = new Set<number>();
+  // ✅ Random size options only for incorrect images
+  const sizeOptions = [30, 60, 90];
 
-    while (correctIndexes.size < NUMBER_OF_CORRECT[level]) {
-      correctIndexes.add(Math.floor(Math.random() * TOTAL_IMAGES[level]));
+  const newImages: GameImage[] = Array.from({ length: totalImages }, (_, i) => {
+    const isCorrect = correctIndexes.has(i);
+
+    let src: string;
+    let size: number;
+
+    if (isCorrect) {
+      // ✅ Correct images have fixed size (50px)
+      src = `${url}${correctImage}`;
+      size = 60;
+    } else {
+      // ❌ Incorrect images have random size
+      const randomSize = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+      src =
+        incorrectList.length > 0
+          ? `${url}${incorrectList[Math.floor(Math.random() * incorrectList.length)]}`
+          : `${url}${correctImage}`; // fallback
+      size = randomSize;
     }
 
-    const newImages: GameImage[] = Array.from({ length: TOTAL_IMAGES[level] }, (_, i) => {
-      const isCorrect = correctIndexes.has(i);
-      const src = isCorrect
-        ? `${url}${CORRECT_IMAGES[level]}`
-        : `${url}${INCORRECT_IMAGES[level][Math.floor(Math.random() * INCORRECT_IMAGES[level].length)]}`;
+    return {
+      id: i,
+      top: positions[i].top,
+      left: positions[i].left,
+      clicked: false,
+      src,
+      isCorrect,
+      size,
+    } as GameImage & { size: number };
+  });
 
-      return {
-        id: i,
-        top: positions[i].top,
-        left: positions[i].left,
-        clicked: false,
-        src,
-        isCorrect,
-      };
-    });
+  setImages(newImages);
+  setCorrect(0);
+  setCount(0);
+}, [level]);
 
-    setImages(newImages);
-  }, [level]);
+
 
   useEffect(() => {
     
@@ -148,18 +176,24 @@ const GameScreen: React.FC = () => {
 
         {/* Game Container */}
         <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full overflow-hidden relative">
-          {images.map(({ id, top, left, src, clicked }) => (
+          {images.map(({ id, top, left, src, clicked, size }) => (
             <img
               key={id}
               src={src}
               alt={`img-${id}`}
               onClick={() => handleClick(id)}
-              className={`absolute w-[50px] h-[50px] cursor-pointer transition-all duration-200 ${
+              className={`absolute cursor-pointer transition-all duration-200 ${
                 clicked ? "opacity-30 scale-90" : "hover:scale-110"
               }`}
-              style={{ top: `${top}%`, left: `${left}%` }}
+              style={{
+                top: `${top}%`,
+                left: `${left}%`,
+                width: `${size}px`,
+                height: `${size}px`,
+              }}
             />
           ))}
+
         </div>
             {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex justify-center items-center z-50">

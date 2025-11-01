@@ -7,28 +7,115 @@ interface GameImage {
     clicked: boolean;
     isCorrect: boolean;
 }
-const baseUrl = "https://visualperceptiondomain.s3.ap-south-1.amazonaws.com/game-assets/visualMemory"
-const flashImage = ["/level1/VM+TR+S.png",
-                    "/level2/target.png", 
-                    "/level3/VM+L2+S.png", 
-                    "/level4/VM+L3+S.png", 
-                    "/level5/VM+L4+S.png", 
-                    "/level6/VM+L5+S.png" ];
+// const baseUrl = "https://visualperceptiondomain.s3.ap-south-1.amazonaws.com/game-assets/visualMemory"
+const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/visualMemory";
 
-const correctImage = ["/level1/VM+TR+CR.png",
-                      "/level2/target.png",
-                      "/level3/VM+L2+CR.png", 
-                      "/level4/VM+L3+CR.png", 
-                      "/level5/VM+L4+CR.png", 
-                      "/level6/VM+L5+CR.png" ];
+const flashImage = [
+  "/level1/objects/VM+TR+CR.png",
+  "/level1/shapes/VM+TR+CR.png",
+  "/level2/objects/VM+L1+CR.png",
+  "/level2/shapes/VM+L1+CR.png",
+  "/level3/objects/VM+L2+CR.png",
+  "/level3/shapes/VM+L2+CR.png",
+  "/level4/objects/VM+L3+CR.png",
+  "/level4/shapes/VM+L3+CR.png",
+  "/level5/objects/VM+L4+CR.png",
+  "/level5/shapes/VM+L4+CR.png",
+  "/level6/objects/VM+L5+CR.png",
+  "/level6/shapes/VM+L5+CR.png",
+];
 
-const inCorrectImage = [["/level1/VM+TR+INC+1.png", "/level1/VM+TR+INC+2.png"],
-                        ["/level2/incorrect1.png", "/level2/incorrect2.png", "/level2/incorrect3.png", "/level2/incorrect4.png"],
-                        ["/level3/VM+L2+INC+1.png","/level3/VM+L2+INC+2.png","/level3/VM+L2+INC+3.png"], 
-                        ["/level4/VM+L3+INC+1.png","/level4/VM+L3+INC+2.png","/level4/VM+L3+INC+3.png", "/level4/VM+L3+INC+4.png"],
-                        ["/level5/VM+L4+INC+1.png","/level5/VM+L4+INC+2.png","/level5/VM+L4+INC+3.png"],
-                        ["/level6/VM+L5+INC+1.png","/level6/VM+L5+INC+2.png","/level6/VM+L5+INC+3.png"],
-                        ];
+// Correct answer for each level
+const correctImage = [
+  "/level1/objects/VM+TR+CR.png",
+  "/level1/shapes/VM+TR+CR.png",
+  "/level2/objects/VM+L1+CR.png",
+  "/level2/shapes/VM+L1+CR.png",
+  "/level3/objects/VM+L2+CR.png",
+  "/level3/shapes/VM+L2+CR.png",
+  "/level4/objects/VM+L3+CR.png",
+  "/level4/shapes/VM+L3+CR.png",
+  "/level5/objects/VM+L4+CR.png",
+  "/level5/shapes/VM+L4+CR.png",
+  "/level6/objects/VM+L5+CR.png",
+  "/level6/shapes/VM+L5+CR.png",
+];
+
+// Incorrect options per level (3–4 per level)
+const inCorrectImage = [
+  // Level 1 - Objects
+  [
+    "/level1/objects/VM+TR+INC+1.png",
+    "/level1/objects/VM+TR+INC+2.png",
+    "/level1/objects/VM+TR+INC+3.png",
+  ],
+  // Level 1 - Shapes
+  [
+    "/level1/shapes/VM+TR+INC+1.png",
+    "/level1/shapes/VM+TR+INC+2.png",
+    "/level1/shapes/VM+TR+INC+3.png",
+  ],
+  [
+    "/level2/objects/VM+L1+INC+1.png",
+    "/level2/objects/VM+L1+INC+2.png",
+    "/level2/objects/VM+L1+INC+3.png",
+  ],
+  // Level 2 - Shapes
+  [
+    "/level2/shapes/VM+L1+INC+1.png",
+    "/level2/shapes/VM+L1+INC+2.png",
+    "/level2/shapes/VM+L1+INC+3.png",
+  ],
+  // Level 2 - Objects
+  [
+    "/level3/objects/VM+L2+INC+1.png",
+    "/level3/objects/VM+L2+INC+2.png",
+    "/level3/objects/VM+L2+INC+3.png",
+  ],
+  // Level 2 - Shapes
+  [
+    "/level3/shapes/VM+L2+INC+1.png",
+    "/level3/shapes/VM+L2+INC+2.png",
+    "/level3/shapes/VM+L2+INC+3.png",
+  ],
+  // Level 3 - Objects
+  [
+    "/level4/objects/VM+L3+INC+1.png",
+    "/level4/objects/VM+L3+INC+2.png",
+    "/level4/objects/VM+L3+INC+3.png",
+  ],
+  // Level 3 - Shapes
+  [
+    "/level4/shapes/VM+L3+INC+1.png",
+    "/level4/shapes/VM+L3+INC+2.png",
+    "/level4/shapes/VM+L3+INC+3.png",
+  ],
+  // Level 4 - Objects
+  [
+    "/level5/objects/VM+L4+INC+1.png",
+    "/level5/objects/VM+L4+INC+2.png",
+    "/level5/objects/VM+L4+INC+3.png",
+  ],
+  // Level 4 - Shapes
+  [
+    "/level5/shapes/VM+L4+INC+1.png",
+    "/level5/shapes/VM+L4+INC+2.png",
+    "/level5/shapes/VM+L4+INC+3.png",
+  ],
+  // Level 5 - Objects
+  [
+    "/level6/objects/VM+L5+INC+1.png",
+    "/level6/objects/VM+L5+INC+2.png",
+    "/level6/objects/VM+L5+INC+3.png",
+  ],
+  // Level 5 - Shapes
+  [
+    "/level6/shapes/VM+L5+INC+1.png",
+    "/level6/shapes/VM+L5+INC+2.png",
+    "/level6/shapes/VM+L5+INC+3.png",
+  ],
+];
+
 const VisualMemory:React.FC = () => {
     const [level, setLevel] = useState(0);
     const [showFlash, setShowFlash] = useState(true);
@@ -44,25 +131,29 @@ const VisualMemory:React.FC = () => {
         img.onload = () => resolve();
         });
 
-    const generateOptions = () => {
-        const correct: GameImage = {
-        id: 0,
-        src: baseUrl + correctImage[level],
-        isCorrect: true,
-        clicked: false,
-        };
-
-        const incorrectList = inCorrectImage[level] || [];
-        const incorrects: GameImage[] = incorrectList.map((src, i) => ({
-        id: i + 1,
-        src: baseUrl + src,
-        isCorrect: false,
-        clicked: false,
-        }));
-
-        const all = [correct, ...incorrects].sort(() => Math.random() - 0.5);
-        setImages(all);
+const generateOptions = () => {
+    const correct: GameImage = {
+      id: 0,
+      src: baseUrl + correctImage[level],
+      isCorrect: true,
+      clicked: false,
     };
+
+    const incorrectList = inCorrectImage[level] || [];
+    const shuffledIncorrect = incorrectList.sort(() => Math.random() - 0.5).slice(0, 3);
+    const incorrects: GameImage[] = shuffledIncorrect.map((src, i) => ({
+      id: i + 1,
+      src: baseUrl + src,
+      isCorrect: false,
+      clicked: false,
+    }));
+
+    // Combine and shuffle all options
+    const allOptions = [correct, ...incorrects].sort(() => Math.random() - 0.5);
+    setImages(allOptions);
+  };
+
+  // Load flash image and transition to options
 
     useEffect(() => {
         preloadImage(baseUrl + flashImage[level]).then(() => {
@@ -132,7 +223,8 @@ const VisualMemory:React.FC = () => {
 
             {/* Option Images */}
             {!showFlash && (
-                <div className="grid grid-cols-3 md:grid-cols-3 gap-4 w-full mt-[15%] justify-between">
+                <div className="w-full flex justify-center items-center mb-6">
+                <div className="grid grid-cols-4 md:grid-cols-4 gap-1 w-full mt-[15%] justify-between items-center">
                 {images.map(({ id, src, clicked }) => (
                     <div
                     key={id}
@@ -149,6 +241,7 @@ const VisualMemory:React.FC = () => {
                     </div>
                 ))}
                     </div>
+                </div>
                 )}
             </div>
             {showModal && (

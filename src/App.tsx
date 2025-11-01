@@ -7,11 +7,9 @@ import VisualDiscrimination from './pages/visualDiscrimination';
 import FormConstancy from './pages/visualFormConstancy';
 import VisualFigureGround from './pages/visualFigureGround';
 import VisualClosure from './pages/visualClosure';
-import Allocentric from './pages/allocentric';
-import Egocentric from './pages/egocentric';
-import Topography from './visualTopography';
+import SpatialResolution from './pages/allocentric';
+import Topography from './pages/visualTopography';
 import GlobalMotion from './pages/globalMotion';
-import LocalMotion from './pages/localMotion';
 import VisualPerceptionForm from './pages/register';
 
 
@@ -25,11 +23,9 @@ const App = () => {
     { path: '/fc', element: <FormConstancy/> },
     { path: '/vfg', element: <VisualFigureGround/> },
     { path: '/vc', element: <VisualClosure/> },
-    { path: '/allo', element: <Allocentric/> },
-    { path: '/ego', element: <Egocentric/> },
+    { path: '/spatial', element: <SpatialResolution/> },
     { path: '/top', element: <Topography/> },
     { path: '/gmp', element: <GlobalMotion/> },
-    { path: '/lmp', element: <LocalMotion/> },
     
     { path: '*', element: <div>404 - Page Not Found</div> },
   ]);

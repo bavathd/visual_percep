@@ -11,18 +11,19 @@ interface GameImage {
 const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/localMotion";
 
 const flashImage = [
-    "LMP STIMULUS/LMP TR OBJECTS S.mp4",
-    "LMP STIMULUS/LMP TR SHAPES S.mp4",
-    "LMP STIMULUS/LMP L1 OBJECTS S.mp4",
-    "LMP STIMULUS/LMP L1 SHAPES S.mp4",
-    "LMP STIMULUS/LMP L2 OBJECTS S.mp4",
-    "LMP STIMULUS/LMP L2 SHAPES S.mp4",
-    "LMP STIMULUS/LMP L3 OBJECTS S.mp4",
-    "LMP STIMULUS/LMP L3 SHAPES S.mp4",
-    "LMP STIMULUS/LMP L4 OBJECTS S.mp4",
-    "LMP STIMULUS/LMP L4 SHAPES S.mp4",
-    "LMP STIMULUS/LMP L5 OBJECTS S.mp4",
-    "LMP STIMULUS/LMP L5 SHAPES S.mp4",
+"/LMP+STIMULUS/LMP+TR+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+TR+SHAPES+S.mp4",
+"/LMP+STIMULUS/LMP+L1+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+L1+SHAPES+S.mp4",
+"/LMP+STIMULUS/LMP+L2+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+L2+SHAPES+S.mp4",
+"/LMP+STIMULUS/LMP+L3+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+L3+SHAPES+S.mp4",
+"/LMP+STIMULUS/LMP+L4+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+L4+SHAPES+S.mp4",
+"/LMP+STIMULUS/LMP+L5+OBJECTS+S.mp4",
+"/LMP+STIMULUS/LMP+L5+SHAPES+S.mp4",
+
  
 ];
 
@@ -199,7 +200,7 @@ const nextLevel = () => {
             </button>
 
             <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-            Visual Figure Ground Test
+            Local Motion Perception
             </div>
 
             <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
@@ -212,11 +213,15 @@ const nextLevel = () => {
             <div className="flex flex-col items-center justify-center w-full space-y-8">
                 {/* Flash Image (Top Row) */}
                 <div className="flex justify-center items-center w-full">
-                    <img
-                    src={baseUrl + flashImage[level]}
-                    alt="Flash"
-                    className="max-w-[30%] h-auto object-contain rounded shadow-xl"
-                    />
+                        <video
+                            key={level} // ensures re-render when level changes
+                            src={baseUrl + flashImage[level].replace(".png", ".mp4")} // or .webm if your videos use that format
+                            autoPlay
+                            muted
+                            playsInline
+                            loop
+                            className="max-w-[40%] h-auto object-contain rounded shadow-xl"
+                        />
                 </div>
 
                 {/* Options (Bottom Row) */}

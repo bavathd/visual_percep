@@ -11,6 +11,7 @@ import SpatialResolution from './pages/allocentric';
 import Topography from './pages/visualTopography';
 import GlobalMotion from './pages/globalMotion';
 import VisualPerceptionForm from './pages/register';
+import LocalMotion from './pages/localMotion';
 
 
 const App = () => {
@@ -26,6 +27,7 @@ const App = () => {
     { path: '/spatial', element: <SpatialResolution/> },
     { path: '/top', element: <Topography/> },
     { path: '/gmp', element: <GlobalMotion/> },
+    { path: '/lmp', element: <LocalMotion/> },
     
     { path: '*', element: <div>404 - Page Not Found</div> },
   ]);

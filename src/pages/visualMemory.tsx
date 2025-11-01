@@ -236,7 +236,7 @@ const generateOptions = () => {
                     <img
                         src={src}
                         alt="Option"
-                        className="w-full h-auto object-contain rounded"
+                        className="w-96 h-auto object-contain rounded"
                     />
                     </div>
                 ))}

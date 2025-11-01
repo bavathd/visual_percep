@@ -32,7 +32,7 @@ const INCORRECT_IMAGES = [
 ];
 
 const NUMBER_OF_CORRECT = [1, 1, 1, 1, 1, 1];
-const TOTAL_IMAGES = [25, 24, 25, 25, 25, 25];
+const TOTAL_IMAGES = [21, 21, 21, 25, 25, 25];
 
 
 const GameScreen: React.FC = () => {

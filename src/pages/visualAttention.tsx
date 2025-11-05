@@ -34,7 +34,7 @@ const INCORRECT_IMAGES = [
 
   ["Level1/objects/VA%2BL1%2BS0.png"], // for level 1
   ["Level1/shapes/VA%2BL1%2BS0.png"],
-  
+
   ["Level2/objects/VA%2BL2%2BS0.png"],
   ["Level2/shapes/VA%2BL2%2BS0.png"],
 
@@ -98,7 +98,7 @@ useEffect(() => {
       const top = Math.floor(Math.random() * 80);
       const left = Math.floor(Math.random() * 95);
       const tooClose = positions.some(
-        pos => Math.abs(pos.top - top) < 12 && Math.abs(pos.left - left) < 12
+        pos => Math.hypot(pos.top - top, pos.left - left) < 10 + Math.random() * 5
       );
       if (!tooClose) positions.push({ top, left });
     }
@@ -198,7 +198,6 @@ IncorrectCount.forEach((count) => {
     if (count >= (NUMBER_OF_CORRECT[level])) {
       setLevel((prev) => prev + 1);
       setCount(0);
-      setCorrect(0);
     }
     if(level>=11){
       setShowModal(true)
@@ -253,7 +252,7 @@ IncorrectCount.forEach((count) => {
 
 
         {/* Game Container */}
-        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 w-full overflow-hidden relative">
+        <div className="flex-1 bg-white rounded-xl shadow-lg p-6 w-full overflow-hidden relative">
           {images.map(({ id, top, left, src, clicked, size }) => (
             <img
               key={id}
@@ -267,7 +266,7 @@ IncorrectCount.forEach((count) => {
                 top: `${top}%`,
                 left: `${left}%`,
                 width: `${size}px`,
-                height: `${size}px`,
+                height:'auto'
               }}
             />
           ))}

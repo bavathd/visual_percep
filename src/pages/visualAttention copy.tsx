@@ -14,78 +14,33 @@ interface GameImage {
 // Move constants outside component to avoid recreating them on every render
 
 const CORRECT_IMAGES = [
-    "TrialRound/objects/VA%2BTR%2BS.png",
-    "TrialRound/shapes/VA%2BTR%2BS.png",
-    "Level1/objects/VA%2BL1%2BS.png",
-    "Level1/shapes/VA%2BL1%2BS.png",
-    "Level2/objects/VA%2BL2%2BS.png",
-    "Level2/shapes/VA%2BL2%2BS.png",
-    "Level3/objects/VA%2BL3%2BS.png",
-    "Level3/shapes/VA%2BL3%2BS.png",
-    "Level4/objects/VA%2BL4%2BS.png",
-    "Level4/shapes/VA%2BL4%2BS.png",
-    "Level5/objects/VA%2BL5%2BS.png",
-    "Level5/shapes/VA%2BL5%2BS.png",
+  "VA+TR+S.png", // level 0 (training)
+  "VA+L1+S.png",
+  "VA+L2+S.png",
+  "VA+L3+S.png",
+  "VA+L4+S.png",
+  "VA+L5+S.png",
 ];
 
 const INCORRECT_IMAGES = [
-  [ "TrialRound/objects/VA%2BTR%2BS0.png"], // for level 0
-  [ "TrialRound/shapes/VA%2BTR%2BS0.png"],
-
-  ["Level1/objects/VA%2BL1%2BS0.png"], // for level 1
-  ["Level1/shapes/VA%2BL1%2BS0.png"],
-  
-  ["Level2/objects/VA%2BL2%2BS0.png"],
-  ["Level2/shapes/VA%2BL2%2BS0.png"],
-
-  [ "Level3/objects/VA%2BL3%2BS0.png",
-    "Level3/objects/VA%2BL3%2BS1.png",
-    "Level3/objects/VA%2BL3%2BS2.png",
-  ], // for level 0
-  [ "Level3/shapes/VA%2BL3%2BS0.png",
-    "Level3/shapes/VA%2BL3%2BS1.png",
-    "Level3/shapes/VA%2BL3%2BS2.png"
-  ], // for level 1
-  [ "Level4/objects/VA%2BL4%2BS0.png",
-    "Level4/objects/VA%2BL4%2BS1.png",
-    "Level4/objects/VA%2BL4%2BS2.png",
-    "Level4/objects/VA%2BL4%2BS3.png"
-  ],
-  [ 
-    "Level4/shapes/VA%2BL4%2BS0.png",
-    "Level4/shapes/VA%2BL4%2BS1.png",
-    "Level4/shapes/VA%2BL4%2BS2.png",
-    "Level4/shapes/VA%2BL4%2BS3.png"
-  ],
-  [ 
-    "Level5/objects/VA%2BL5%2BS0.png",
-    "Level5/objects/VA%2BL5%2BS1.png",
-    "Level5/objects/VA%2BL5%2BS2.png",
-    "Level5/objects/VA%2BL5%2BS3.png",
-    "Level5/objects/VA%2BL5%2BS4.png",
-  ],
-  [ 
-    "Level5/shapes/VA%2BL5%2BS0.png",
-    "Level5/shapes/VA%2BL5%2BS1.png",
-    "Level5/shapes/VA%2BL5%2BS2.png",
-    "Level5/shapes/VA%2BL5%2BS3.png",
-    "Level5/shapes/VA%2BL5%2BS4.png",
-  ],
-  
+  ["VA+TR+S0.png"], // for level 0
+  ["VA+L1+S0.png"], // for level 1
+  ["VA+L2+S0.png"],
+  ["VA+L3+S0.png"],
+  ["VA+L4+S0.png"],
+  ["VA+L5+S0.png"],
 ];
 
-const NUMBER_OF_CORRECT = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-const NUMBER_OF_INCORRECT = [[20],[20],[20],[20],[20],[20],[10,7,5],[10,7,5],[10,7,5,3],[10,7,5,3],[10,7,5,3,2],[10,7,5,3,2]]
-const TOTAL_IMAGES = [21, 21, 21, 21, 21, 21, 23, 23, 26, 26, 28, 28];
+const NUMBER_OF_CORRECT = [1, 1, 1, 1, 1, 1];
+const TOTAL_IMAGES = [21, 21, 21, 25, 25, 25];
 
 
-const GameScreen: React.FC = () => {
+const GameScreen_demo: React.FC = () => {
   const [level, setLevel] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
   //const url = "https://visualperceptiondomain.s3.ap-south-1.amazonaws.com/game-assets/visualAttention/";
-  const url = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/vads/";
-  //const url = "http://127.0.0.1:5500/vads/";
+  const url = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/visualAttention/";
 
   const [correct, setCorrect] = useState<number>(1);
   const [images, setImages] = useState<GameImage[]>([]);
@@ -106,8 +61,7 @@ useEffect(() => {
   };
 
   const correctCount = NUMBER_OF_CORRECT[level] || 1;
-  const IncorrectCount = NUMBER_OF_INCORRECT[level];
-  const totalImages = TOTAL_IMAGES[level] || 28;
+  const totalImages = TOTAL_IMAGES[level] || 25;
 
   const positions = generateUniquePositions(totalImages);
 
@@ -117,74 +71,42 @@ useEffect(() => {
     correctIndexes.add(Math.floor(Math.random() * totalImages));
   }
 
-// ✅ remaining available positions
-const availablePositions = Array.from({ length: totalImages }, (_, i) => i).filter(
-  (i) => !correctIndexes.has(i)
-);
-
-// ✅ divide remaining positions among incorrect groups (exhaustively)
-const incorrectPositions: number[][] = [];
-let indexPointer = 0;
-
-IncorrectCount.forEach((count) => {
-  const group: number[] = [];
-
-  for (let i = 0; i < count && indexPointer < availablePositions.length; i++) {
-    group.push(availablePositions[indexPointer]);
-    indexPointer++;
-  }
-
-  incorrectPositions.push(group);
-});
-
-  // ✅ flatten incorrect indexes
-  const allIncorrectIndexes = incorrectPositions.flat()
-  const allAssigned = new Set([...correctIndexes, ...allIncorrectIndexes]);
-
-  if (allAssigned.size !== totalImages) {
-  console.warn("⚠️ Some positions unassigned!", totalImages - allAssigned.size);
-  } else {
-  console.log("✅ All positions assigned:", allAssigned.size);
-  }
-
   const correctImage = CORRECT_IMAGES[level];
   const incorrectList = INCORRECT_IMAGES[level] || [];
 
   // ✅ Random size options only for incorrect images
-  const sizeOptions = [70, 80, 90];
-  
+  const sizeOptions = [30, 60, 90];
 
   const newImages: GameImage[] = Array.from({ length: totalImages }, (_, i) => {
-  const isCorrect = correctIndexes.has(i);
-  let src: string;
-  let size: number;
+    const isCorrect = correctIndexes.has(i);
 
-  if (isCorrect) {
-    src = `${url}${correctImage}`;
-    size = 75;
-  } else {
-    // find which group this position belongs to
-    let groupIndex = incorrectPositions.findIndex((group) => group.includes(i));
-    if (groupIndex === -1) groupIndex = 0; // fallback safety
+    let src: string;
+    let size: number;
 
-    // assign image in order of group index (no randomness)
-    const incorrectImg =
-      incorrectList[groupIndex % incorrectList.length] || correctImage;
+    if (isCorrect) {
+      // ✅ Correct images have fixed size (50px)
+      src = `${url}${correctImage}`;
+      size = 60;
+    } else {
+      // ❌ Incorrect images have random size
+      const randomSize = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
+      src =
+        incorrectList.length > 0
+          ? `${url}${incorrectList[Math.floor(Math.random() * incorrectList.length)]}`
+          : `${url}${correctImage}`; // fallback
+      size = randomSize;
+    }
 
-    src = `${url}${incorrectImg}`;
-    size = sizeOptions[Math.floor(Math.random() * sizeOptions.length)];
-  }
-
-  return {
-    id: i,
-    top: positions[i].top,
-    left: positions[i].left,
-    clicked: false,
-    src,
-    isCorrect,
-    size,
-  } as GameImage & { size: number };
-});
+    return {
+      id: i,
+      top: positions[i].top,
+      left: positions[i].left,
+      clicked: false,
+      src,
+      isCorrect,
+      size,
+    } as GameImage & { size: number };
+  });
 
   setImages(newImages);
   setCorrect(0);
@@ -200,7 +122,7 @@ IncorrectCount.forEach((count) => {
       setCount(0);
       setCorrect(0);
     }
-    if(level>=11){
+    if(level>=5){
       setShowModal(true)
     }
   }, [count, level]); // Add dependencies for the useEffect
@@ -303,4 +225,4 @@ IncorrectCount.forEach((count) => {
   );
 };
 
-export default GameScreen;
+export default GameScreen_demo;

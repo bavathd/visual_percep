@@ -199,7 +199,7 @@ IncorrectCount.forEach((count) => {
       setLevel((prev) => prev + 1);
       setCount(0);
     }
-    if(level>=11){
+    if(level>=12){
       setShowModal(true)
     }
   }, [count, level]); // Add dependencies for the useEffect

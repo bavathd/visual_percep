@@ -46,6 +46,11 @@ const VisualPerceptionForm = () => {
   const [hasSiblings, setHasSiblings] = useState<string>("No");
   const [visionProblem, setVisionProblem] = useState<string>("Absent");
   const [residentialType, setResidentialType] = useState<string>("Rural");
+  const [motherTongue, setMotherTongue] = useState("");
+  const [knownLanguages, setKnownLanguages] = useState<string[]>([]);
+  const [selectedLang, setSelectedLang] = useState("");
+  const [customKnownLanguage, setCustomKnownLanguage] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const handleLanguage = (e: React.ChangeEvent<HTMLSelectElement>)=>{
      const value = e.target.value;
@@ -117,6 +122,41 @@ const calculateBMI = () => {
     if (bmi < 30) return { category: "Overweight", color: "bg-warning text-warning-foreground" };
     return { category: "Obese", color: "bg-destructive text-destructive-foreground" };
   };
+const handleAddLanguage = () => {
+    const lang = showCustomInput ? customKnownLanguage.trim() : selectedLang;
+
+    if (lang && !knownLanguages.includes(lang)) {
+      setKnownLanguages([...knownLanguages, lang]);
+      setSelectedLang("");
+      setCustomKnownLanguage("");
+      setShowCustomInput(false);
+    }
+  };
+
+  // ✅ Enter key adds language instead of submitting form
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddLanguage();
+    }
+  };
+
+  // ✅ Remove a language tag
+  const handleRemove = (lang: string) => {
+    setKnownLanguages(knownLanguages.filter((l) => l !== lang));
+  };
+
+  // ✅ Handle dropdown change
+  const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === "Others") {
+      setShowCustomInput(true);
+      setSelectedLang("");
+    } else {
+      setShowCustomInput(false);
+      setSelectedLang(value);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-form p-4 md:p-6">
@@ -138,7 +178,9 @@ const calculateBMI = () => {
           </div>
         </div>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+            }}>
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
             <div className="p-6 border-b border-form-border">
               <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
@@ -151,7 +193,7 @@ const calculateBMI = () => {
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner name *</label>
+                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner Name *</label>
                   <input 
                     type="text" 
                     id="Examiner_name" 
@@ -183,24 +225,6 @@ const calculateBMI = () => {
             </div>
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner name *</label>
-                  <input 
-                    type="text" 
-                    id="Examiner_name" 
-                    placeholder="Enter Examiner name" 
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="examiner_profession" className="block text-sm font-medium text-gray-700">Examiner Profession *</label>
-                  <input 
-                    type="text" 
-                    id="examiner_profession" 
-                    placeholder="Enter Examiner Profession" 
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
                 <div className="space-y-2">
                   <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name *</label>
                   <input 
@@ -241,7 +265,7 @@ const calculateBMI = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Calculated Age</label>
+                  <label className="block text-sm font-medium text-gray-700">Calculated Chronological Age</label>
                   <div className="p-3 bg-accent-light rounded-md border">
                     <span className="inline-block px-2 py-1 bg-secondary text-secondary-foreground rounded text-sm">
                       {age || "Enter date of birth"}
@@ -251,28 +275,91 @@ const calculateBMI = () => {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Medium of Instruction in School *</label>
-                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    value={selectedLanguage}
-                    onChange={handleLanguage}
-                >
-                  <option value="">Select primary language</option>
-                    {INDIAN_LANGUAGES.map((lang) =>
-                    (
-                      <option value={lang}>{lang}</option>
-                    ))
-                    }
-                    <option value="Others">Other</option>
-                  </select>
-                  {selectedLanguage === 'Others' && (
-                    <input 
-                      type="text" 
-                      id="language"
-                      value={customLanguage} 
-                      onChange={handleCustomChange}
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  )}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Mother Tongue*
+                    </label>
+                    <select
+                      value={motherTongue}
+                      onChange={(e) => setMotherTongue(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Select Mother Tongue</option>
+                      {INDIAN_LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                      <option value="Other">Other</option>
+                    </select>
+                    {motherTongue === "Other" && (
+                      <input
+                        type="text"
+                        placeholder="Enter Mother Tongue"
+                        className="mt-2 w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      />
+                    )}
+                  </div>
+
+                  {/* Other Known Languages */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Other Known Languages
+                    </label>
+
+                    <div className="flex items-center gap-2">
+                      {!showCustomInput ? (
+                        <select
+                          value={selectedLang}
+                          onChange={handleDropdownChange}
+                          className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">Select a language</option>
+                          {INDIAN_LANGUAGES.map((lang) => (
+                            <option key={lang} value={lang}>
+                              {lang}
+                            </option>
+                          ))}
+                          <option value="Others">Others</option>
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder="Enter custom language"
+                          value={customKnownLanguage}
+                          onChange={(e) => setCustomKnownLanguage(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleAddLanguage}
+                        className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                      >
+                        Add
+                      </button>
+                    </div>
+
+                    {/* Show Added Tags */}
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {knownLanguages.map((lang) => (
+                        <span
+                          key={lang}
+                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                        >
+                          {lang}
+                          <button
+                            type="button"
+                            onClick={() => handleRemove(lang)}
+                            className="text-blue-500 hover:text-blue-700 font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
               </div>
 
               <div className="space-y-2">
@@ -300,7 +387,7 @@ const calculateBMI = () => {
                   )}
               </div>
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">language Comprehension in Reading *</label>
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Language Comprehension in Reading *</label>
                 <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     value={Reading}
                     onChange={handleReading}
@@ -324,7 +411,7 @@ const calculateBMI = () => {
                   )}
               </div>
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">language Comprehension in Writing *</label>
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Language Comprehension in Writing *</label>
                 <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     value={Writing}
                     onChange={handleWriting}
@@ -373,7 +460,7 @@ const calculateBMI = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">BMI</label>
+                  <label className="block text-sm font-medium text-gray-700"> Body Mass Index (BMI)</label>
                   <div className="p-3 bg-accent-light rounded-md border">
                     {bmi && (
                       <div className="flex flex-col gap-1">
@@ -405,7 +492,7 @@ const calculateBMI = () => {
                     <input type="checkbox" id="lenses" className="text-primary" />
                     <label htmlFor="lenses" className="text-sm">Wears Contact Lenses</label>
                     <input type="checkbox" id="OthersEye" className="text-primary" checked={othersEye} onChange={(e)=>setOthersEye(e.target.checked)}/>
-                    <label htmlFor="OthersEye" className="text-sm">others</label>
+                    <label htmlFor="OthersEye" className="text-sm">Others</label>
                     { othersEye && (
                       <input
                         type="text"
@@ -430,7 +517,7 @@ const calculateBMI = () => {
                     <input type="checkbox" id="glasses" className="text-primary" />
                     <label htmlFor="glasses" className="text-sm">Wears Hearing Aids</label>
                     <input type="checkbox" id="othersEar" className="text-primary" checked={othersEar} onChange={(e)=>setOthersEar(e.target.checked)}/>
-                    <label htmlFor="othersEar" className="text-sm">others</label>
+                    <label htmlFor="othersEar" className="text-sm">Others</label>
                     { othersEar && (
                       <input
                         type="text"

@@ -37,7 +37,7 @@ const BirthAndMedicalInfo: React.FC = () => {
           "Gestational Hypertension",
           "TORCH Infection",
           "Iron and Folic Acid Supplements",
-          "Multiple births",
+          "Multiple Births",
         ].map((item) => (
           <div key={item}>
             <label className="block text-sm font-medium">History of {item}</label>
@@ -108,7 +108,7 @@ const BirthAndMedicalInfo: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium">History of prolonged/difficult labour</label>
+          <label className="block text-sm font-medium">History of Prolonged/Difficult Labour</label>
           <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
             <option value="">Select</option>
             <option value="present">Present</option>
@@ -121,13 +121,13 @@ const BirthAndMedicalInfo: React.FC = () => {
       <div className="space-y-4">
         <h5 className="font-semibold text-black underline">Postnatal</h5>
         {[
-          "NICU admission",
-          "birth trauma",
+          "NICU Admission",
+          "Birth Trauma",
           "Failure to Thrive",
-          "Seizures/Infantile spasm",
+          "Seizures/Infantile Spasm",
           "Infections",
-          "infantile stroke",
-          "hydrocephalus/shunt placement",
+          "Infantile Stroke",
+          "Hydrocephalus/Shunt Placement",
         ].map((item) => (
           <div key={item}>
             <label className="block text-sm font-medium">History of {item}</label>
@@ -155,9 +155,9 @@ const BirthAndMedicalInfo: React.FC = () => {
         </h4>
 
         {[
-          "congenital or acquired vision problems",
-          "any eye/brain surgery",
-          "any regular medications taken",
+          "Congenital or Acquired Vision Problems",
+          "Any Eye/Brain Surgery",
+          "Any Regular Medications Taken",
           "Sleep Disturbances",
         ].map((item) => (
           <div key={item}>
@@ -178,7 +178,7 @@ const BirthAndMedicalInfo: React.FC = () => {
         {/* Delayed Developmental Milestones */}
         <div>
           <label className="block text-sm font-medium">
-            History of delayed developmental milestones
+            History of Delayed Developmental Milestones
           </label>
           <select className="w-full px-3 py-2 border border-gray-300 rounded-md mb-2">
             <option value="">Select</option>

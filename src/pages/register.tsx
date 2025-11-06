@@ -102,14 +102,14 @@ const VisualPerceptionForm = () => {
     setAge(`${years} years, ${months} months`);
   };
 
-  const calculateBMI = () => {
-    if (height && weight) {
-      const h = parseFloat(height) / 100;
-      const w = parseFloat(weight);
-      const bmiValue = (w / (h * h)).toFixed(2);
-      setBmi(bmiValue);
-    }
-  };
+const calculateBMI = () => {
+  if (height && weight) {
+    const h = parseFloat(height) / 100; // convert cm → meters
+    const w = parseFloat(weight)*10;
+    const bmiValue = w / (h * h); // BMI formula: weight(kg) / height(m)^2
+    setBmi(bmiValue.toFixed(2)); // round to 2 decimal places
+  }
+};
 
   const getBMICategory = (bmi: number) => {
     if (bmi < 18.5) return { category: "Underweight", color: "bg-warning text-warning-foreground" };
@@ -129,7 +129,7 @@ const VisualPerceptionForm = () => {
                 <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
-                <h1 className="text-2xl md:text-3xl font-bold">Visual Perception Assessment Form</h1>
+                <h1 className="text-2xl md:text-3xl font-bold"> Registration Form </h1>
               </div>
               <p className="text-primary-foreground/90">
                 Comprehensive developmental and visual perception evaluation
@@ -139,6 +139,38 @@ const VisualPerceptionForm = () => {
         </div>
 
         <form className="space-y-6">
+          <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
+            <div className="p-6 border-b border-form-border">
+              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+               Examiner Profile
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner name *</label>
+                  <input 
+                    type="text" 
+                    id="Examiner_name" 
+                    placeholder="Enter Examiner name" 
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="examiner_profession" className="block text-sm font-medium text-gray-700">Examiner Profession *</label>
+                  <input 
+                    type="text" 
+                    id="examiner_profession" 
+                    placeholder="Enter Examiner Profession" 
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+           </div>
+          </div>
           {/* Personal Details */}
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
             <div className="p-6 border-b border-form-border">
@@ -146,11 +178,29 @@ const VisualPerceptionForm = () => {
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                1. Demographic Profile
+                Demographic Profile
               </h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner name *</label>
+                  <input 
+                    type="text" 
+                    id="Examiner_name" 
+                    placeholder="Enter Examiner name" 
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="examiner_profession" className="block text-sm font-medium text-gray-700">Examiner Profession *</label>
+                  <input 
+                    type="text" 
+                    id="examiner_profession" 
+                    placeholder="Enter Examiner Profession" 
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
                 <div className="space-y-2">
                   <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name *</label>
                   <input 
@@ -198,6 +248,31 @@ const VisualPerceptionForm = () => {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Medium of Instruction in School *</label>
+                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    value={selectedLanguage}
+                    onChange={handleLanguage}
+                >
+                  <option value="">Select primary language</option>
+                    {INDIAN_LANGUAGES.map((lang) =>
+                    (
+                      <option value={lang}>{lang}</option>
+                    ))
+                    }
+                    <option value="Others">Other</option>
+                  </select>
+                  {selectedLanguage === 'Others' && (
+                    <input 
+                      type="text" 
+                      id="language"
+                      value={customLanguage} 
+                      onChange={handleCustomChange}
+                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
               </div>
 
               <div className="space-y-2">
@@ -305,7 +380,7 @@ const VisualPerceptionForm = () => {
                         <span className="inline-block px-2 py-1 bg-gray-100 border rounded text-sm font-medium">
                           BMI: {bmi}
                         </span>
-                        <span className={`inline-block px-2 py-1 rounded text-xs text-white ${getBMICategory(parseFloat(bmi)).color}`}>
+                        <span className={`inline-block px-2 py-1 rounded text-xs text-green-500 ${getBMICategory(parseFloat(bmi)).color}`}>
                           {getBMICategory(parseFloat(bmi)).category}
                         </span>
                       </div>
@@ -793,31 +868,64 @@ const VisualPerceptionForm = () => {
           {/* Consent */}
           <div className="bg-white rounded-lg shadow-md border-2 border-primary/20">
             <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header">7. Consent & Authorization</h2>
+              <h4 className="text-lg font-semibold text-black">7. Consent & Authorization</h4>
             </div>
+
             <div className="p-6 space-y-4">
               <div className="space-y-4">
-                <div className="flex items-start space-x-3 p-4 bg-primary-light rounded-lg">
+                <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
                   <input type="checkbox" id="consent1" className="mt-1 text-primary" />
-                  <label htmlFor="consent1" className="text-sm leading-relaxed">
-                    I give consent for my child to undergo digital visual perception assessment and understand that this evaluation will help determine appropriate educational and therapeutic interventions.
+                  <label htmlFor="consent1" className="text-sm leading-relaxed text-black">
+                    I give consent for my child to undergo the Digitalized Comprehensive Visual Perception Assessment-Children (DCVPA-C).
                   </label>
                 </div>
-                <div className="flex items-start space-x-3 p-4 bg-accent-light rounded-lg">
+
+                <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
                   <input type="checkbox" id="consent2" className="mt-1 text-primary" />
-                  <label htmlFor="consent2" className="text-sm leading-relaxed">
-                    I authorize sharing of assessment results with the school/educational institution and relevant therapists/specialists for the purpose of developing appropriate support plans.
+                  <label htmlFor="consent2" className="text-sm leading-relaxed text-black">
+                    I give consent to use the assessment results for clinical, academic, and/or research purposes.
                   </label>
                 </div>
-                <div className="flex items-start space-x-3 p-4 bg-muted rounded-lg">
+
+                <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
                   <input type="checkbox" id="consent3" className="mt-1 text-primary" />
-                  <label htmlFor="consent3" className="text-sm leading-relaxed">
+                  <label htmlFor="consent3" className="text-sm leading-relaxed text-black">
                     I confirm that all information provided is accurate and complete to the best of my knowledge.
                   </label>
+                </div>
+
+                {/* Consent Given By Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                  <div>
+                    <label htmlFor="consentGivenBy" className="block text-sm font-medium text-black mb-1">
+                      Consent Given By
+                    </label>
+                    <input
+                      type="text"
+                      id="consentGivenBy"
+                      name="consentGivenBy"
+                      className="w-full border border-gray-400 rounded-md p-2 text-black"
+                      placeholder="Enter full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="consentDateTime" className="block text-sm font-medium text-black mb-1">
+                      Date & Time
+                    </label>
+                    <input
+                      type="datetime-local"
+                      id="consentDateTime"
+                      name="consentDateTime"
+                      defaultValue={new Date().toISOString().slice(0, 16)}
+                      className="w-full border border-gray-400 rounded-md p-2 text-black"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
 
           {/* Submit Button */}
           <div className="flex justify-center pt-6">

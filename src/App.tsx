@@ -12,6 +12,7 @@ import Topography from './pages/visualTopography';
 import GlobalMotion from './pages/globalMotion';
 import VisualPerceptionForm from './pages/register';
 import LocalMotion from './pages/localMotion';
+import EyeTrackingVideo from './pages/visualtracking';
 
 
 const App = () => {
@@ -28,6 +29,8 @@ const App = () => {
     { path: '/top', element: <Topography/> },
     { path: '/gmp', element: <GlobalMotion/> },
     { path: '/lmp', element: <LocalMotion/> },
+    { path: '/vt', element: <EyeTrackingVideo/> },
+
     
     { path: '*', element: <div>404 - Page Not Found</div> },
   ]);

@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import UserDetails from '../components/parentDetails';
+import BirthAndMedicalInfo from '../components/birthMedicalInfo';
+import DevelopmentalDisorderInfo from '../components/developmental';
 
 const INDIAN_LANGUAGES: string[] = [
   "English",
@@ -38,6 +41,11 @@ const VisualPerceptionForm = () => {
   const [customReading, setCustomReading] = useState<string>("");  
   const [Writing, setWriting] = useState("")
   const [customWriting, setCustomWriting] = useState<string>("");
+  const [othersEye, setOthersEye] = useState(false);
+  const [othersEar, setOthersEar] = useState(false);
+  const [hasSiblings, setHasSiblings] = useState<string>("No");
+  const [visionProblem, setVisionProblem] = useState<string>("Absent");
+  const [residentialType, setResidentialType] = useState<string>("Rural");
 
   const handleLanguage = (e: React.ChangeEvent<HTMLSelectElement>)=>{
      const value = e.target.value;
@@ -319,150 +327,224 @@ const VisualPerceptionForm = () => {
                   <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
                     <input type="checkbox" id="glasses" className="text-primary" />
                     <label htmlFor="glasses" className="text-sm">Wears Glasses</label>
-                    <input type="checkbox" id="contact lenses" className="text-primary" />
-                    <label htmlFor="contact lenses" className="text-sm">Wears Contact Lenses</label>
-                    <input type="checkbox" id="others" className="text-primary" />
-                    <label htmlFor="others" className="text-sm">others</label>
+                    <input type="checkbox" id="lenses" className="text-primary" />
+                    <label htmlFor="lenses" className="text-sm">Wears Contact Lenses</label>
+                    <input type="checkbox" id="OthersEye" className="text-primary" checked={othersEye} onChange={(e)=>setOthersEye(e.target.checked)}/>
+                    <label htmlFor="OthersEye" className="text-sm">others</label>
+                    { othersEye && (
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        className="border rounded-md px-2 py-1 text-sm outline-none"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="visionStatus" className="block text-sm font-medium text-gray-700">Hearing Status</label>
+                  <label htmlFor="HearingStatus" className="block text-sm font-medium text-gray-700">Hearing Status</label>
                   <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">Select vision status</option>
+                    <option value="">Select Hearing status</option>
                     <option value="normal">Normal</option>
                     <option value="not Assessed yet">Needs Checkup</option>
                     <option value="unknown">Unknown</option>
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Visual Aids</label>
+                  <label className="block text-sm font-medium text-gray-700">Hearing Aids</label>
                   <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
                     <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">Wears Glasses</label>
-                    <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">Wears Contact Lenses</label>
-                    <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">others</label>
+                    <label htmlFor="glasses" className="text-sm">Wears Hearing Aids</label>
+                    <input type="checkbox" id="othersEar" className="text-primary" checked={othersEar} onChange={(e)=>setOthersEar(e.target.checked)}/>
+                    <label htmlFor="othersEar" className="text-sm">others</label>
+                    { othersEar && (
+                      <input
+                        type="text"
+                        placeholder="Please specify"
+                        className="border rounded-md px-2 py-1 text-sm outline-none"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
-
               <div className="border-t border-gray-200 pt-4">
-                <h4 className="font-semibold text-form-header mb-3">Guardian Information</h4>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label htmlFor="guardianName" className="block text-sm font-medium text-gray-700">Parent/Guardian Name *</label>
-                    <input 
-                      type="text" 
-                      id="guardianName" 
-                      placeholder="Enter guardian name" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="relationship" className="block text-sm font-medium text-gray-700">Relationship to Child *</label>
-                    <input 
-                      type="text" 
-                      id="relationship" 
-                      placeholder="e.g., Mother, Father, Guardian" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
+                <h4 className="font-semibold text-form-header mb-3">3. Family Demographic Profile</h4>
+                <div className="space-y-2">
+                  <label htmlFor="breadwinner" className="block text-sm font-medium text-gray-700">Breadwinner of the Family</label>
+                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select</option>
+                    <option value="Father">Father</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Others">Others</option>
+                  </select>
                 </div>
+                <div className="mt-3">
+                    <UserDetails sectionTitle='Father Details'></UserDetails>
+                </div>
+                <div className="mt-3">
+                    <UserDetails sectionTitle='Mothers Details'></UserDetails>
+                </div>
+                <div className="mt-3">
+                    <UserDetails sectionTitle='Guardian Details'></UserDetails>
+                </div>
+                <div className="p-6 bg-white rounded-2xl shadow-md space-y-4 mt-6 border border-gray-200">
+                  <h2 className="text-xl font-semibold text-blue-600 mb-2">
+                    Additional Personal Details
+                  </h2>
 
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <label htmlFor="maritalStatus" className="block text-sm font-medium text-gray-700">Marital Status</label>
-                    <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                      <option value="">Select status</option>
-                      <option value="single">Single</option>
-                      <option value="married">Married</option>
-                      <option value="divorced">Divorced</option>
-                      <option value="separated">Separated</option>
+                  {/* Siblings */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">Siblings:</label>
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="siblings"
+                          value="Yes"
+                          checked={hasSiblings === "Yes"}
+                          onChange={() => setHasSiblings("Yes")}
+                        />
+                        <span>Yes</span>
+                      </label>
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="siblings"
+                          value="No"
+                          checked={hasSiblings === "No"}
+                          onChange={() => setHasSiblings("No")}
+                        />
+                        <span>No</span>
+                      </label>
+                    </div>
+
+                    {hasSiblings === "Yes" && (
+                      <div className="flex flex-col md:flex-row md:space-x-4 mt-2">
+                        <div className="flex-1 flex flex-col">
+                          <label className="font-medium mb-1">Sibling Type:</label>
+                          <select className="border rounded-lg px-3 py-2">
+                            <option value="">Select Type</option>
+                            <option>Older</option>
+                            <option>Younger</option>
+                            <option>Both</option>
+                          </select>
+                        </div>
+                        <div className="flex-1 flex flex-col mt-3 md:mt-0">
+                          <label className="font-medium mb-1">Number of Siblings:</label>
+                          <input
+                            type="number"
+                            placeholder="Enter number"
+                            className="border rounded-lg px-3 py-2"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Vision Problems */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">History of Vision Problems:</label>
+                    <div className="flex items-center space-x-4">
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="vision"
+                          value="Present"
+                          checked={visionProblem === "Present"}
+                          onChange={() => setVisionProblem("Present")}
+                        />
+                        <span>Present</span>
+                      </label>
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="vision"
+                          value="Absent"
+                          checked={visionProblem === "Absent"}
+                          onChange={() => setVisionProblem("Absent")}
+                        />
+                        <span>Absent</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Illness History */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">
+                      History of Other Illness (specify):
+                    </label>
+                    <textarea
+                      placeholder="Enter illness details if any"
+                      className="border rounded-lg px-3 py-2"
+                    ></textarea>
+                  </div>
+
+                  {/* Marital Status */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">Marital Status:</label>
+                    <select className="border rounded-lg px-3 py-2">
+                      <option value="">Select Status</option>
+                      <option>Single</option>
+                      <option>Married</option>
+                      <option>Divorced</option>
+                      <option>Separated</option>
                     </select>
                   </div>
-                  <div className="space-y-2">
-                    <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700">Primary Contact Number *</label>
-                    <input 
-                      type="tel" 
-                      id="contactNumber" 
-                      placeholder="Enter contact number" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                </div>
 
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <label htmlFor="motherAge" className="block text-sm font-medium text-gray-700">Mother's Age</label>
-                    <input 
-                      type="number" 
-                      id="motherAge" 
-                      placeholder="Age" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="fatherAge" className="block text-sm font-medium text-gray-700">Father's Age</label>
-                    <input 
-                      type="number" 
-                      id="fatherAge" 
-                      placeholder="Age" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <label htmlFor="motherOccupation" className="block text-sm font-medium text-gray-700">Mother's Occupation</label>
-                    <input 
-                      type="text" 
-                      id="motherOccupation" 
-                      placeholder="Enter occupation" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="fatherOccupation" className="block text-sm font-medium text-gray-700">Father's Occupation</label>
-                    <input 
-                      type="text" 
-                      id="fatherOccupation" 
-                      placeholder="Enter occupation" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2 mt-4">
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address *</label>
-                  <textarea 
-                    id="address" 
-                    placeholder="Enter complete address" 
-                    rows={3}
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  ></textarea>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="space-y-2">
-                    <label htmlFor="familyIncome" className="block text-sm font-medium text-gray-700">Family Income</label>
-                    <input 
-                      type="text" 
-                      id="familyIncome" 
-                      placeholder="Annual income range" 
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="socioeconomicStatus" className="block text-sm font-medium text-gray-700">Socioeconomic Status</label>
-                    <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                      <option value="">Select status</option>
-                      <option value="low">Low Income</option>
-                      <option value="middle">Middle Income</option>
-                      <option value="upper-middle">Upper Middle Income</option>
-                      <option value="high">High Income</option>
+                  {/* Socioeconomic Status */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">Socioeconomic Status:</label>
+                    <select className="border rounded-lg px-3 py-2">
+                      <option value="">Select Status</option>
+                      <option>Upper</option>
+                      <option>Upper Middle</option>
+                      <option>Lower Middle</option>
+                      <option>Upper Lower</option>
+                      <option>Lower</option>
                     </select>
+                  </div>
+
+                  {/* Residential Address */}
+                  <div className="flex flex-col">
+                    <label className="font-medium mb-1">Residential Address:</label>
+                    <div className="flex items-center space-x-6 mb-3">
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="residentialType"
+                          value="Rural"
+                          checked={residentialType === "Rural"}
+                          onChange={() => setResidentialType("Rural")}
+                        />
+                        <span>Rural</span>
+                      </label>
+                      <label className="flex items-center space-x-1">
+                        <input
+                          type="radio"
+                          name="residentialType"
+                          value="Urban"
+                          checked={residentialType === "Urban"}
+                          onChange={() => setResidentialType("Urban")}
+                        />
+                        <span>Urban</span>
+                      </label>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:space-x-4">
+                      <div className="flex-1 flex flex-col">
+                        <label className="font-medium mb-1">Permanent Address:</label>
+                        <textarea
+                          placeholder="Enter permanent address"
+                          className="border rounded-lg px-3 py-2"
+                        ></textarea>
+                      </div>
+                      <div className="flex-1 flex flex-col mt-3 md:mt-0">
+                        <label className="font-medium mb-1">Local Address:</label>
+                        <textarea
+                          placeholder="Enter local address"
+                          className="border rounded-lg px-3 py-2"
+                        ></textarea>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -470,304 +552,243 @@ const VisualPerceptionForm = () => {
           </div>
 
           {/* Physical Information */}
-          <div className="bg-white rounded-lg shadow-md border-l-4 border-l-accent">
-            <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                2. Physical Information
-              </h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="height" className="block text-sm font-medium text-gray-700">Height (cm) *</label>
-                  <input 
-                    type="number" 
-                    id="height"
-                    placeholder="Height in cm"
-                    value={height} 
-                    onChange={(e) => { setHeight(e.target.value); calculateBMI(); }}
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Weight (kg) *</label>
-                  <input 
-                    type="number" 
-                    id="weight"
-                    placeholder="Weight in kg"
-                    value={weight} 
-                    onChange={(e) => { setWeight(e.target.value); calculateBMI(); }}
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">BMI</label>
-                  <div className="p-3 bg-accent-light rounded-md border">
-                    {bmi && (
-                      <div className="flex flex-col gap-1">
-                        <span className="inline-block px-2 py-1 bg-gray-100 border rounded text-sm font-medium">
-                          BMI: {bmi}
-                        </span>
-                        <span className={`inline-block px-2 py-1 rounded text-xs text-white ${getBMICategory(parseFloat(bmi)).color}`}>
-                          {getBMICategory(parseFloat(bmi)).category}
-                        </span>
-                      </div>
-                    )}
-                    {!bmi && <span className="text-muted-foreground text-sm">Enter height & weight</span>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="visionStatus" className="block text-sm font-medium text-gray-700">Vision Status</label>
-                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">Select vision status</option>
-                    <option value="normal">Normal</option>
-                    <option value="needs-checkup">Needs Checkup</option>
-                    <option value="unknown">Unknown</option>
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Visual Aids</label>
-                  <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
-                    <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">Wears Glasses/Contact Lenses</label>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="bg-white ">
+            <BirthAndMedicalInfo></BirthAndMedicalInfo>
           </div>
+      
 
           {/* School Details */}
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-warning">
             <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
+              <h4 className="text-lg font-semibold text-black flex items-center gap-2">
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                3. School Details
-              </h2>
+                6. School Profile
+              </h4>
             </div>
-            <div className="p-6 space-y-4">
+
+            <div className="p-6 space-y-4 text-black">
+              {/* School Name */}
               <div className="space-y-2">
-                <label htmlFor="schoolName" className="block text-sm font-medium text-gray-700">School Name *</label>
-                <input 
-                  type="text" 
-                  id="schoolName" 
-                  placeholder="Enter school name" 
+                <label htmlFor="schoolName" className="block text-sm font-medium text-black">School Name *</label>
+                <input
+                  type="text"
+                  id="schoolName"
+                  placeholder="Enter school name"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="classSection" className="block text-sm font-medium text-gray-700">Class & Section *</label>
-                  <input 
-                    type="text" 
-                    id="classSection" 
-                    placeholder="e.g., Grade 5-A" 
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="schoolType" className="block text-sm font-medium text-gray-700">School Type</label>
-                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
-                    <option value="">Select school type</option>
-                    <option value="mainstream">Mainstream</option>
-                    <option value="special">Special Education</option>
-                    <option value="inclusive">Inclusive</option>
-                  </select>
-                </div>
-              </div>
+
+              {/* Class & Section */}
               <div className="space-y-2">
-                <label htmlFor="schoolAddress" className="block text-sm font-medium text-gray-700">School Address</label>
-                <textarea 
-                  id="schoolAddress" 
-                  placeholder="Enter school address" 
+                <label htmlFor="classSection" className="block text-sm font-medium text-black">Class & Section *</label>
+                <input
+                  type="text"
+                  id="classSection"
+                  placeholder="e.g., Grade 5-A"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+              {/* School Address */}
+              <div className="space-y-2">
+                <label htmlFor="schoolAddress" className="block text-sm font-medium text-black">School Address</label>
+                <textarea
+                  id="schoolAddress"
+                  placeholder="Enter school address"
                   rows={2}
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 ></textarea>
               </div>
+
+              {/* Type of Education */}
               <div className="space-y-2">
-                <label htmlFor="supportStaff" className="block text-sm font-medium text-gray-700">Support Staff Assigned</label>
-                <input 
-                  type="text" 
-                  id="supportStaff" 
-                  placeholder="e.g., Special educator, Aide" 
+                <label htmlFor="educationType" className="block text-sm font-medium text-black">Type of Education</label>
+                <select
+                  id="educationType"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select type</option>
+                  <option value="mainstream">Mainstream</option>
+                  <option value="special">Special Education</option>
+                  <option value="inclusive">Inclusive</option>
+                </select>
+              </div>
+
+              {/* If Mainstream */}
+              <div className="space-y-2">
+                <label htmlFor="schoolType" className="block text-sm font-medium text-black">If Mainstream, specify</label>
+                <select
+                  id="schoolType"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select option</option>
+                  <option value="government">Government</option>
+                  <option value="private">Private</option>
+                </select>
+              </div>
+
+              {/* Board Type */}
+              <div className="space-y-2">
+                <label htmlFor="schoolBoard" className="block text-sm font-medium text-black">If Mainstream, specify board</label>
+                <select
+                  id="schoolBoard"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  <option value="">Select board</option>
+                  <option value="state">State Board</option>
+                  <option value="cbse">CBSE Board</option>
+                  <option value="icse">ICSE Board</option>
+                </select>
+              </div>
+
+              {/* Support Staff */}
+              <div className="space-y-2">
+                <label htmlFor="supportStaff" className="block text-sm font-medium text-black">Support Staff Assigned (if any)</label>
+                <input
+                  type="text"
+                  id="supportStaff"
+                  placeholder="e.g., Special educator, Aide"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+              {/* Screen Use */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-black">Screen use in school setting</label>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center">
+                    <input type="radio" name="screenUse" value="yes" className="mr-2" /> Yes
+                  </label>
+                  <label className="flex items-center">
+                    <input type="radio" name="screenUse" value="no" className="mr-2" /> No
+                  </label>
+                </div>
+                <input
+                  type="number"
+                  placeholder="If yes, duration (hours)"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+
+              {/* Purpose of Use */}
+              <div className="space-y-2">
+                <label htmlFor="purposeUse" className="block text-sm font-medium text-black">Purpose of use</label>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2" /> Watching
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2" /> Reading
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2" /> Writing
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2" /> Others (specify)
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2  p-6 border-t border-form-border">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  7. Extracurricular Activities
+                </h3>
+                <label className="block text-sm font-medium text-gray-700">
+                  Participation in extracurricular activities
+                </label>
+                <div className="flex items-center space-x-6">
+                  <label className="flex items-center space-x-1">
+                    <input type="radio" name="extracurricular" value="yes" />
+                    <span>Yes</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="radio" name="extracurricular" value="no" />
+                    <span>No</span>
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  placeholder="If yes, specify activities"
+                  className="w-full mt-2 px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+
+              {/* Screen Time at Home */}
+              <div className="space-y-2 pt-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  8. History of Screentime Exposure at Home
+                </h3>
+                <label
+                  htmlFor="durationHome"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Duration (in hours)
+                </label>
+                <input
+                  type="number"
+                  id="durationHome"
+                  placeholder="Enter duration of screen use"
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+
+                <label className="block text-sm font-medium text-gray-700">
+                  Medium of Exposure
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="tv" />
+                    <span>TV</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="mobile" />
+                    <span>Mobiles</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="tablet" />
+                    <span>Tablets</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="computer" />
+                    <span>Computers</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="otherMedia" />
+                    <span>Others</span>
+                  </label>
+                </div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Purpose of Use
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="games" />
+                    <span>Online Games</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="cartoons" />
+                    <span>Watch Cartoons/Shows</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="schoolwork" />
+                    <span>School Work</span>
+                  </label>
+                  <label className="flex items-center space-x-1">
+                    <input type="checkbox" id="othersUse" />
+                    <span>Others (specify)</span>
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  placeholder="If others, specify"
+                  className="w-full mt-2 px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
             </div>
           </div>
 
-          {/* Medical Information */}
-          <div className="bg-white rounded-lg shadow-md border-l-4 border-l-destructive">
-            <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                4. Medical Information
-              </h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="medicalHistory" className="block text-sm font-medium text-gray-700">Medical History</label>
-                <textarea 
-                  id="medicalHistory" 
-                  placeholder="Include allergies, seizure history, sleep issues, current medications, etc."
-                  rows={4}
-                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                ></textarea>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Regular Medical Care</label>
-                <div className="flex gap-6">
-                  <label className="flex items-center">
-                    <input type="radio" name="medicalCare" value="yes" className="mr-2 text-primary" />
-                    Yes
-                  </label>
-                  <label className="flex items-center">
-                    <input type="radio" name="medicalCare" value="no" className="mr-2 text-primary" />
-                    No
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Developmental Disability */}
-          <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
-            <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-                5. Developmental Disability & Communication
-              </h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label htmlFor="diagnosis" className="block text-sm font-medium text-gray-700">Diagnosis/Condition</label>
-                  <input 
-                    type="text" 
-                    id="diagnosis" 
-                    placeholder="Enter diagnosis if any" 
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="diagnosedBy" className="block text-sm font-medium text-gray-700">Diagnosed By</label>
-                  <input 
-                    type="text" 
-                    id="diagnosedBy" 
-                    placeholder="Doctor/Specialist name" 
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="comorbidConditions" className="block text-sm font-medium text-gray-700">Comorbid Conditions</label>
-                <input 
-                  type="text" 
-                  id="comorbidConditions" 
-                  placeholder="Any additional conditions" 
-                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">Communication Methods (Check all that apply)</label>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {[
-                    { id: "verbal", label: "Verbal Communication" },
-                    { id: "nonverbal", label: "Non-verbal Communication" },
-                    { id: "sign", label: "Sign Language" },
-                    { id: "aac", label: "AAC Device" },
-                    { id: "gestures", label: "Gestures" },
-                    { id: "other-comm", label: "Other Methods" }
-                  ].map((method) => (
-                    <div key={method.id} className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
-                      <input type="checkbox" id={method.id} className="text-primary" />
-                      <label htmlFor={method.id} className="text-sm">{method.label}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Requires Special Support/Accommodations</label>
-                <div className="flex gap-6">
-                  <label className="flex items-center">
-                    <input type="radio" name="support" value="yes" className="mr-2 text-primary" />
-                    Yes
-                  </label>
-                  <label className="flex items-center">
-                    <input type="radio" name="support" value="no" className="mr-2 text-primary" />
-                    No
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Document Upload */}
-          <div className="bg-white rounded-lg shadow-md border-l-4 border-l-accent">
-            <div className="p-6 border-b border-form-border">
-              <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                6. Document Upload
-              </h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="space-y-3">
-                <label className="block text-sm font-medium text-gray-700">Required Documents (Check available documents)</label>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {[
-                    { id: "iep", label: "IEP/IDEP Report" },
-                    { id: "medical", label: "Medical/Diagnosis Reports" },
-                    { id: "visual", label: "Previous Visual/Neuro Assessments" },
-                    { id: "doctor", label: "Doctor's Letter/Prescription" }
-                  ].map((doc) => (
-                    <div key={doc.id} className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
-                      <input type="checkbox" id={doc.id} className="text-primary" />
-                      <label htmlFor={doc.id} className="text-sm">{doc.label}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label htmlFor="fileUpload" className="block text-sm font-medium text-gray-700">Upload Documents</label>
-                <div className="border-2 border-dashed border-input-border rounded-lg p-6 text-center hover:border-primary/50 transition-colors">
-                  <svg className="h-8 w-8 mx-auto text-muted-foreground mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Click to upload or drag and drop files here
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Supported formats: PDF, JPG, PNG, DOC, DOCX (Max 10MB)
-                  </p>
-                  <input type="file" multiple className="hidden" id="fileUpload" />
-                  <button 
-                    type="button"
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    onClick={() => document.getElementById('fileUpload')?.click()}
-                  >
-                    Select Files
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
+          <DevelopmentalDisorderInfo></DevelopmentalDisorderInfo>
 
           {/* Consent */}
           <div className="bg-white rounded-lg shadow-md border-2 border-primary/20">

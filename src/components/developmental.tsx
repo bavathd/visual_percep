@@ -62,7 +62,7 @@ const DevelopmentalDisorderInfo: React.FC = () => {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        9. Developmental / Neurodevelopmental / Neurodivergent Condition
+        9. Neurodevelopmental Profile
       </h4>
 
       {/* Provisional Diagnosis */}

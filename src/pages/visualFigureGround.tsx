@@ -1,5 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  resetLevelTimer,
+  startLevelTimer,
+  stopLevelTimer,
+} from "../utils/timerStore";
+import { saveScore } from "../utils/scoreStorage";
 
 interface GameImage {
   id: string; // change from string → number
@@ -8,7 +14,8 @@ interface GameImage {
   isCorrect: boolean;
 }
 
-const baseUrl = "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/vfg";
+const baseUrl =
+  "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/vfg";
 
 const flashImage = [
   "/level1/objects/FG+TR+S.png",
@@ -22,7 +29,7 @@ const flashImage = [
   "/level5/objects/FG+L4+S.png",
   "/level5/shapes/FG+L4+S.png",
   "/level6/objects/FG+L5+S.png",
-  "/level6/shapes/FG+L5+S.png"
+  "/level6/shapes/FG+L5+S.png",
 ];
 
 const correctImage = [
@@ -37,7 +44,7 @@ const correctImage = [
   "/level5/objects/FG+L4+CR.png",
   "/level5/shapes/FG+L4+CR.png",
   "/level6/objects/FG+L5+CR.png",
-  "/level6/shapes/FG+L5+CR.png"
+  "/level6/shapes/FG+L5+CR.png",
 ];
 
 const inCorrectImage = [
@@ -46,81 +53,80 @@ const inCorrectImage = [
     [
       "/level1/objects/FG+TR+INC+1.png",
       "/level1/objects/FG+TR+INC+2.png",
-      "/level1/objects/FG+TR+INC+3.png"
+      "/level1/objects/FG+TR+INC+3.png",
     ],
     [
       "/level1/shapes/FG+TR+INC+1.png",
       "/level1/shapes/FG+TR+INC+2.png",
-      "/level1/shapes/FG+TR+INC+3.png"
-    ]
+      "/level1/shapes/FG+TR+INC+3.png",
+    ],
   ],
   [
     // Level 2
     [
       "/level2/objects/FG+L1+INC+1.png",
       "/level2/objects/FG+L1+INC+2.png",
-      "/level2/objects/FG+L1+INC+3.png"
+      "/level2/objects/FG+L1+INC+3.png",
     ],
     [
       "/level2/shapes/FG+L1+INC+1.png",
       "/level2/shapes/FG+L1+INC+2.png",
-      "/level2/shapes/FG+L1+INC+3.png"
-    ]
+      "/level2/shapes/FG+L1+INC+3.png",
+    ],
   ],
   [
     // Level 3
     [
       "/level3/objects/FG+L2+INC+1.png",
       "/level3/objects/FG+L2+INC+2.png",
-      "/level3/objects/FG+L2+INC+3.png"
+      "/level3/objects/FG+L2+INC+3.png",
     ],
     [
       "/level3/shapes/FG+L2+INC+1.png",
       "/level3/shapes/FG+L2+INC+2.png",
-      "/level3/shapes/FG+L2+INC+3.png"
-    ]
+      "/level3/shapes/FG+L2+INC+3.png",
+    ],
   ],
   [
     // Level 4
     [
       "/level4/objects/FG+L3+INC+1.png",
       "/level4/objects/FG+L3+INC+2.png",
-      "/level4/objects/FG+L3+INC+3.png"
+      "/level4/objects/FG+L3+INC+3.png",
     ],
     [
       "/level4/shapes/FG+L3+INC+1.png",
       "/level4/shapes/FG+L3+INC+2.png",
-      "/level4/shapes/FG+L3+INC+3.png"
-    ]
+      "/level4/shapes/FG+L3+INC+3.png",
+    ],
   ],
   [
     // Level 5
     [
       "/level5/objects/FG+L4+INC+1.png",
       "/level5/objects/FG+L4+INC+2.png",
-      "/level5/objects/FG+L4+INC+3.png"
+      "/level5/objects/FG+L4+INC+3.png",
     ],
     [
       "/level5/shapes/FG+L4+INC+1.png",
       "/level5/shapes/FG+L4+INC+2.png",
-      "/level5/shapes/FG+L4+INC+3.png"
-    ]
+      "/level5/shapes/FG+L4+INC+3.png",
+    ],
   ],
   [
     // Level 6
     [
       "/level6/objects/FG+L5+INC+1.png",
       "/level6/objects/FG+L5+INC+2.png",
-      "/level6/objects/FG+L5+INC+3.png"
+      "/level6/objects/FG+L5+INC+3.png",
     ],
     [
       "/level6/shapes/FG+L5+INC+1.png",
       "/level6/shapes/FG+L5+INC+2.png",
-      "/level6/shapes/FG+L5+INC+3.png"
-    ]
-  ]
+      "/level6/shapes/FG+L5+INC+3.png",
+    ],
+  ],
 ];
-
 
 const VisualFigureGround: React.FC = () => {
   const [level, setLevel] = useState(0);
@@ -139,7 +145,7 @@ const VisualFigureGround: React.FC = () => {
       id: "correct",
       src: baseUrl + correctImage[level],
       isCorrect: true,
-      clicked: false
+      clicked: false,
     };
 
     const incorrectList = isShape
@@ -150,10 +156,11 @@ const VisualFigureGround: React.FC = () => {
       id: `incorrect-${i}`,
       src: baseUrl + src,
       isCorrect: false,
-      clicked: false
+      clicked: false,
     }));
 
     const all = [correctImg, ...incorrects].sort(() => Math.random() - 0.5);
+    startLevelTimer();
     setImages(all);
   };
 
@@ -162,83 +169,89 @@ const VisualFigureGround: React.FC = () => {
   }, [level]);
 
   const handleClick = (id: string) => {
-  setImages((prev) =>
-    prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
-  );
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
+    );
 
-  const selected = images.find((img) => img.id === id);
-  if (selected?.isCorrect) {
-    setCorrect((prev) => prev + 1);
-    console.log("✅ Correct clicked! Total correct:", correct + 1);
-  } else {
-    console.log("❌ Incorrect clicked!");
-  }
+    const selected = images.find((img) => img.id === id);
+    if (selected?.isCorrect) {
+      setCorrect((prev) => prev + 1);
+      console.log("✅ Correct clicked! Total correct:", correct + 1);
+    } else {
+      console.log("❌ Incorrect clicked!");
+    }
+    const durationMs = stopLevelTimer(); // returns ms
+    console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
+    console.log(`✅ Level ${level + 1}`);
+    if (level >= 2) {
+      saveScore("sunny", "vfg", level + 1 - 2, correct, durationMs);
+    }
 
-  nextLevel();
-};
+    nextLevel();
+  };
 
-const nextLevel = () => {
-  if (level < flashImage.length - 1) {
-    console.log("Moving to next level:", level + 1);
-    setLevel((prev) => prev + 1);
-    setShowModal(false);
-  } else {
-    console.log("Game Completed! Total Correct:", correct);
-    setShowModal(true);
-  }
-};
-
+  const nextLevel = () => {
+    resetLevelTimer();
+    setCorrect(0);
+    if (level < flashImage.length - 1) {
+      console.log("Moving to next level:", level + 1);
+      setLevel((prev) => prev + 1);
+      setShowModal(false);
+    } else {
+      console.log("Game Completed! Total Correct:", correct);
+      setShowModal(true);
+    }
+  };
 
   return (
     <div className="w-screen h-screen bg-gradient-to-t from-white to-blue-500 dark:from-blue-900 dark:to-gray-900 flex flex-col p-4">
       {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-            <button className="text-blue-700 dark:text-blue-300 hover:bg-amber-50 font-semibold bg-amber-300 rounded-2xl px-4 py-2 shadow">
-            ← Back
-            </button>
+      <div className="flex justify-between items-center mb-4">
+        <button className="text-blue-700 dark:text-blue-300 hover:bg-amber-50 font-semibold bg-amber-300 rounded-2xl px-4 py-2 shadow">
+          ← Back
+        </button>
 
-            <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-            Visual Figure Ground Test
-            </div>
-
-            <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-            VPd1110
-            </div>
+        <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
+          Visual Figure Ground Test
         </div>
 
-        {/* Game Container */}
-        <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex items-center justify-center">
-            <div className="flex flex-col items-center justify-center w-full space-y-8">
-                {/* Flash Image (Top Row) */}
-                <div className="flex justify-center items-center w-full">
-                    <img
-                    src={baseUrl + flashImage[level]}
-                    alt="Flash"
-                    className="max-w-[30%] h-auto object-contain rounded shadow-xl"
-                    />
-                </div>
-
-                {/* Options (Bottom Row) */}
-                <div className="grid grid-cols-4 gap-2 justify-items-center w-full">
-                    {images.map(({ id, src, clicked }) => (
-                    <div
-                        key={id}
-                        onClick={() => handleClick(id)}
-                        className={`bg-white rounded-xl p-2 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
-                        clicked ? "opacity-50" : ""
-                        }`}
-                    >
-                        <img
-                        src={src}
-                        alt="Option"
-                        className="w-100 h-100 object-contain rounded"
-                        />
-                    </div>
-                    ))}
-                </div>
-            </div>
+        <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
+          VPd1110
         </div>
+      </div>
 
+      {/* Game Container */}
+      <div className="flex-1 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center w-full space-y-8">
+          {/* Flash Image (Top Row) */}
+          <div className="flex justify-center items-center w-full">
+            <img
+              src={baseUrl + flashImage[level]}
+              alt="Flash"
+              className="max-w-[30%] h-auto object-contain rounded shadow-xl"
+            />
+          </div>
+
+          {/* Options (Bottom Row) */}
+          <div className="grid grid-cols-4 gap-2 justify-items-center w-full">
+            {images.map(({ id, src, clicked }) => (
+              <div
+                key={id}
+                onClick={() => handleClick(id)}
+                className={`bg-white rounded-xl p-2 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
+                  clicked ? "opacity-50" : ""
+                }`}
+              >
+                <img
+                  src={src}
+                  alt="Option"
+                  className="w-100 h-100 object-contain rounded"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {/* Completion Modal */}
       {showModal && (

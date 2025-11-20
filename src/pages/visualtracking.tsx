@@ -17,7 +17,7 @@ const EyeTrackingVideo: React.FC = () => {
 
     const startWebGazer = async () => {
       try {
-        await webgazer.setRegression("ridge").setGazeListener((data: GazeData | null) => {
+        await webgazer.setRegression("threadedRidge").setGazeListener((data: GazeData | null) => {
           if (!data || !canvasRef.current) return;
           const ctx = canvasRef.current.getContext("2d");
           if (!ctx) return;

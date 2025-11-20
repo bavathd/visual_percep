@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { resetLevelTimer, startLevelTimer, stopLevelTimer } from "../utils/timerStore";
+import { saveScore } from "../utils/scoreStorage";
 
 interface GameImage {
     id:number,
@@ -150,6 +152,7 @@ const generateOptions = () => {
 
     // Combine and shuffle all options
     const allOptions = [correct, ...incorrects].sort(() => Math.random() - 0.5);
+    startLevelTimer();
     setImages(allOptions);
   };
 
@@ -176,6 +179,12 @@ const generateOptions = () => {
         if (selected?.isCorrect) {
             setCorrect(1);
         }
+        const durationMs = stopLevelTimer(); // returns ms
+        console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
+        console.log(`✅ Level ${level + 1}`);
+        if(level >= 2) {
+            saveScore("sunny","vm", (level +1) - 2, correct, durationMs);
+          }
         nextLevel();
     };
 
@@ -183,6 +192,7 @@ const generateOptions = () => {
         if (level < flashImage.length - 1) {
         setLevel(level + 1);
         setShowFlash(true);
+        resetLevelTimer()
         setShowModal(false);
         console.log(correct);
         } else {

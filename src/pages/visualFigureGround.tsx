@@ -135,6 +135,13 @@ const VisualFigureGround: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
 
   const navigate = useNavigate();
+  const vid = localStorage.getItem("CURRENT_VPD_ID");
+  useEffect(() => {
+    if (!vid) {
+      alert("No VPD ID found. Please register first.");
+      navigate("/register"); // redirect to registration
+    }
+  }, [vid, navigate]);
 
   const generateOptions = () => {
     // Determine if current level is object or shape
@@ -183,8 +190,21 @@ const VisualFigureGround: React.FC = () => {
     const durationMs = stopLevelTimer(); // returns ms
     console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
     console.log(`✅ Level ${level + 1}`);
+    if (!vid) {
+      return (
+        <div className="p-10 text-center text-xl font-bold">
+          Checking VPD ID...
+        </div>
+      );
+    }
     if (level >= 2) {
-      saveScore("sunny", "vfg", level + 1 - 2, correct, durationMs);
+      saveScore(
+        vid,
+        "Visual Figure Ground",
+        level + 1 - 2,
+        correct,
+        durationMs
+      );
     }
 
     nextLevel();
@@ -212,11 +232,11 @@ const VisualFigureGround: React.FC = () => {
         </button>
 
         <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-          Visual Figure Ground Test
+          Visual Figure Ground
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          VPd1110
+          Sub 1:VFG Item{level}
         </div>
       </div>
 
@@ -258,14 +278,14 @@ const VisualFigureGround: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex justify-center items-center z-50">
           <div className="bg-white dark:bg-gray-800 text-center rounded-xl shadow-2xl p-6 w-80 mx-4 transform transition-all duration-300">
             <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
-              Visual Figure Ground Assessment
+              Assessment
             </h2>
             <p className="text-gray-700 dark:text-gray-300 mb-6">
               Completed Successfully
             </p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/home")}
+                onClick={() => navigate("/vc")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg"
               >
                 Next Assessment

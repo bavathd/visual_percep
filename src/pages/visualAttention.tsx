@@ -100,6 +100,8 @@ const NUMBER_OF_INCORRECT = [
 const TOTAL_IMAGES = [21, 21, 21, 21, 21, 21, 23, 23, 26, 26, 28, 28];
 
 const GameScreen: React.FC = () => {
+  const vpdId = localStorage.getItem("CURRENT_VPD_ID");
+
   const [level, setLevel] = useState<number>(0);
   const [count, setCount] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -114,7 +116,7 @@ const GameScreen: React.FC = () => {
   useEffect(() => {
     // Start timer when new level begins
     startLevelTimer();
-  }, [level]);
+  }, [level, vpdId]);
 
   useEffect(() => {
     const generateUniquePositions = (
@@ -237,18 +239,28 @@ const GameScreen: React.FC = () => {
   }, [count, correct]);
 
   useEffect(() => {
+    if (!vpdId) {
+      console.error("❌ No VPD ID found");
+      return;
+    }
     if (count >= NUMBER_OF_CORRECT[level]) {
       const durationMs = stopLevelTimer(); // returns ms
       console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
       console.log(`✅ Level ${level + 1} complete with count ${count}`);
       if (level >= 2) {
-        saveScore("sunny", "va", level + 1 - 2, correct, durationMs);
+        saveScore(
+          vpdId,
+          "Visual Attention",
+          level + 1 - 2,
+          correct,
+          durationMs
+        );
       }
 
       // 🎯 Check if we just finished the last level
       if (level + 1 >= 12) {
         setShowModal(true);
-        const scores = getAllUserScores("sunny");
+        const scores = getAllUserScores(vpdId);
         console.table(scores);
         // Get all saved scores from localStorage
         return; // stop here — don’t go to next level
@@ -263,7 +275,7 @@ const GameScreen: React.FC = () => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [count, level, correct]);
+  }, [count, level, correct, vpdId]);
 
   const handleClick = (id: number) => {
     setImages((prevImages) =>
@@ -295,11 +307,11 @@ const GameScreen: React.FC = () => {
         </button>
 
         <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-          Game Name
+          Visual Attention
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          VPd1110
+          Sub 1:VA Item{level}
         </div>
       </div>
 
@@ -327,14 +339,11 @@ const GameScreen: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md flex justify-center items-center z-50">
           <div className="bg-white dark:bg-gray-800 text-center rounded-xl shadow-2xl p-6 w-80 mx-4 transform transition-all duration-300">
             <h2 className="text-xl font-bold mb-4 text-blue-600 dark:text-white">
-              Game Over
+              Assessment Completed
             </h2>
-            <p className="text-gray-700 dark:text-gray-300 mb-6">
-              You completed 10 levels!
-            </p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/home")}
+                onClick={() => navigate("/vm")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
               >
                 Next Assessment

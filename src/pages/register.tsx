@@ -1,8 +1,74 @@
-import { useState } from 'react';
-import UserDetails from '../components/parentDetails';
-import BirthAndMedicalInfo from '../components/birthMedicalInfo';
-import DevelopmentalDisorderInfo from '../components/developmental';
+import React, { useState, useRef } from "react";
+import { db, auth } from "../utils/firebasesdk";
 
+import {
+  collection,
+  doc,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
+
+import UserDetails from "../components/parentDetails";
+import BirthAndMedicalInfo from "../components/birthMedicalInfo";
+import DevelopmentalDisorderInfo from "../components/developmental";
+import type { UserDetailsHandle } from "../components/parentDetails";
+import type { BirthAndMedicalInfoHandle } from "../components/birthMedicalInfo";
+import type { DevelopmentalInfoHandle } from "../components/developmental";
+import { useNavigate } from "react-router-dom";
+async function generateRegistrationId(): Promise<string> {
+  const registrationsRef = collection(db, "registrations");
+
+  const q = query(registrationsRef, orderBy("serial", "desc"), limit(1));
+  const snapshot = await getDocs(q);
+
+  let newSerial = 1;
+
+  if (!snapshot.empty) {
+    const lastId = snapshot.docs[0].data().serial as number;
+    newSerial = lastId + 1;
+  }
+
+  const padded = String(newSerial).padStart(3, "0");
+  return `VPD${padded}`;
+}
+
+async function handleFirestoreSave(
+  formData: Record<string, unknown>
+): Promise<string> {
+  try {
+    const adminEmail = auth.currentUser?.email ?? "unknown-admin";
+
+    const registrationId = await generateRegistrationId();
+
+    await runTransaction(db, async (transaction) => {
+      const registrationsRef = collection(db, "registrations");
+      const docRef = doc(registrationsRef, registrationId);
+
+      transaction.set(docRef, {
+        registrationId,
+        serial: parseInt(registrationId.replace("VPD", "")),
+        adminEmail,
+        createdAt: serverTimestamp(),
+        ...formData,
+      });
+    });
+
+    alert(`Form saved successfully! Registration ID: ${registrationId}`);
+    return registrationId;
+  } catch (err) {
+    if (err instanceof Error) {
+      alert("Error saving to Firestore: " + err.message);
+      throw err;
+    } else {
+      alert("Unknown Firestore error");
+      throw new Error("Unknown Firestore error");
+    }
+  }
+}
 const INDIAN_LANGUAGES: string[] = [
   "English",
   "Assamese",
@@ -26,20 +92,21 @@ const INDIAN_LANGUAGES: string[] = [
   "Sindhi",
   "Tamil",
   "Telugu",
-  "Urdu"
+  "Urdu",
 ];
 
-const VisualPerceptionForm = () => {
-  const [dob, setDob] = useState('');
-  const [age, setAge] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [bmi, setBmi] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState("")
+const VisualPerceptionForm: React.FC = () => {
+  const navigate = useNavigate();
+  const [dob, setDob] = useState("");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [weight, setWeight] = useState("");
+  const [bmi, setBmi] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
   const [customLanguage, setCustomLanguage] = useState<string>("");
-  const [Reading, setReading] = useState("")
-  const [customReading, setCustomReading] = useState<string>("");  
-  const [Writing, setWriting] = useState("")
+  const [Reading, setReading] = useState("");
+  const [customReading, setCustomReading] = useState<string>("");
+  const [Writing, setWriting] = useState("");
   const [customWriting, setCustomWriting] = useState<string>("");
   const [othersEye, setOthersEye] = useState(false);
   const [othersEar, setOthersEar] = useState(false);
@@ -52,21 +119,75 @@ const VisualPerceptionForm = () => {
   const [customKnownLanguage, setCustomKnownLanguage] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  const handleLanguage = (e: React.ChangeEvent<HTMLSelectElement>)=>{
-     const value = e.target.value;
-   if (value !== "Others") {
-    setSelectedLanguage(value);
-    setCustomLanguage(""); // clear any previous custom input
-  } else {
-    setSelectedLanguage("Others"); // show text box for custom entry
-  }
-  }
-  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const customValue = e.target.value;
-    setCustomLanguage(customValue);
+  // Refs for child components
+  const fatherRef = useRef<UserDetailsHandle | null>(null);
+  const motherRef = useRef<UserDetailsHandle | null>(null);
+  const guardianRef = useRef<UserDetailsHandle | null>(null);
+  const birthRef = useRef<BirthAndMedicalInfoHandle | null>(null);
+  const developmentalRef = useRef<DevelopmentalInfoHandle | null>(null);
+
+  const calculateAge = (dateString: string) => {
+    if (!dateString) {
+      setAge("");
+      return;
+    }
+    const today = new Date();
+    const birthDate = new Date(dateString);
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    setAge(`${years} years, ${months} months`);
   };
 
-    const handleReading = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const calculateBMI = () => {
+    if (height && weight) {
+      const h = parseFloat(height) / 100;
+      const w = parseFloat(weight) * 10;
+      const bmiValue = w / (h * h);
+      setBmi(bmiValue.toFixed(2));
+    }
+  };
+
+  const getBMICategory = (bmiValue: number) => {
+    if (bmiValue < 18.5)
+      return {
+        category: "Underweight",
+        color: "bg-warning text-warning-foreground",
+      };
+    if (bmiValue < 25)
+      return {
+        category: "Normal",
+        color: "bg-success text-success-foreground",
+      };
+    if (bmiValue < 30)
+      return {
+        category: "Overweight",
+        color: "bg-warning text-warning-foreground",
+      };
+    return {
+      category: "Obese",
+      color: "bg-destructive text-destructive-foreground",
+    };
+  };
+
+  const handleLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value !== "Others") {
+      setSelectedLanguage(value);
+      setCustomLanguage("");
+    } else {
+      setSelectedLanguage("Others");
+    }
+  };
+
+  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomLanguage(e.target.value);
+  };
+
+  const handleReading = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value !== "Others") {
       setReading(value);
@@ -77,8 +198,7 @@ const VisualPerceptionForm = () => {
   };
 
   const handleCustomReading = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const customValue = e.target.value;
-    setCustomReading(customValue);
+    setCustomReading(e.target.value);
   };
 
   const handleWriting = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -92,39 +212,11 @@ const VisualPerceptionForm = () => {
   };
 
   const handleCustomWriting = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const customValue = e.target.value;
-    setCustomWriting(customValue);
-  };
-  const calculateAge = (dob: string) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let years = today.getFullYear() - birthDate.getFullYear();
-    let months = today.getMonth() - birthDate.getMonth();
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-    setAge(`${years} years, ${months} months`);
+    setCustomWriting(e.target.value);
   };
 
-const calculateBMI = () => {
-  if (height && weight) {
-    const h = parseFloat(height) / 100; // convert cm → meters
-    const w = parseFloat(weight)*10;
-    const bmiValue = w / (h * h); // BMI formula: weight(kg) / height(m)^2
-    setBmi(bmiValue.toFixed(2)); // round to 2 decimal places
-  }
-};
-
-  const getBMICategory = (bmi: number) => {
-    if (bmi < 18.5) return { category: "Underweight", color: "bg-warning text-warning-foreground" };
-    if (bmi < 25) return { category: "Normal", color: "bg-success text-success-foreground" };
-    if (bmi < 30) return { category: "Overweight", color: "bg-warning text-warning-foreground" };
-    return { category: "Obese", color: "bg-destructive text-destructive-foreground" };
-  };
-const handleAddLanguage = () => {
+  const handleAddLanguage = () => {
     const lang = showCustomInput ? customKnownLanguage.trim() : selectedLang;
-
     if (lang && !knownLanguages.includes(lang)) {
       setKnownLanguages([...knownLanguages, lang]);
       setSelectedLang("");
@@ -133,7 +225,6 @@ const handleAddLanguage = () => {
     }
   };
 
-  // ✅ Enter key adds language instead of submitting form
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -141,12 +232,10 @@ const handleAddLanguage = () => {
     }
   };
 
-  // ✅ Remove a language tag
   const handleRemove = (lang: string) => {
     setKnownLanguages(knownLanguages.filter((l) => l !== lang));
   };
 
-  // ✅ Handle dropdown change
   const handleDropdownChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (value === "Others") {
@@ -158,6 +247,208 @@ const handleAddLanguage = () => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const examinerName = (
+      document.getElementById("Examiner_name") as HTMLInputElement | null
+    )?.value;
+
+    const examinerProfession = (
+      document.getElementById("examiner_profession") as HTMLInputElement | null
+    )?.value;
+
+    const fullName = (
+      document.getElementById("fullName") as HTMLInputElement | null
+    )?.value;
+
+    const gender =
+      (
+        document.querySelector(
+          'input[name="gender"]:checked'
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const visionStatus =
+      (document.getElementById("visionStatus") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const visionAidsGlasses =
+      (document.getElementById("glasses") as HTMLInputElement | null)
+        ?.checked ?? false;
+
+    const visionAidsLenses =
+      (document.getElementById("lenses") as HTMLInputElement | null)?.checked ??
+      false;
+
+    const hearingStatus =
+      (document.getElementById("HearingStatus") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const hearingAid =
+      (document.getElementById("hearingAid") as HTMLInputElement | null)
+        ?.checked ?? false;
+
+    const breadwinner =
+      (document.getElementById("breadwinner") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const schoolName =
+      (document.getElementById("schoolName") as HTMLInputElement | null)
+        ?.value ?? "";
+
+    const classSection =
+      (document.getElementById("classSection") as HTMLInputElement | null)
+        ?.value ?? "";
+
+    const schoolAddress =
+      (document.getElementById("schoolAddress") as HTMLTextAreaElement | null)
+        ?.value ?? "";
+
+    const educationType =
+      (document.getElementById("educationType") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const schoolType =
+      (document.getElementById("schoolType") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const schoolBoard =
+      (document.getElementById("schoolBoard") as HTMLSelectElement | null)
+        ?.value ?? "";
+
+    const supportStaff =
+      (document.getElementById("supportStaff") as HTMLInputElement | null)
+        ?.value ?? "";
+
+    const schoolScreenUse =
+      (
+        document.querySelector(
+          'input[name="screenUse"]:checked'
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const schoolScreenDuration =
+      (
+        document.querySelector(
+          'input[data-role="school-screen-duration"]'
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const extracurricular =
+      (
+        document.querySelector(
+          'input[name="extracurricular"]:checked'
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const extracurricularDetails =
+      (
+        document.getElementById(
+          "extracurricular_details"
+        ) as HTMLInputElement | null
+      )?.value ?? "";
+
+    const screenTimeHome =
+      (document.getElementById("durationHome") as HTMLInputElement | null)
+        ?.value ?? "";
+
+    const consentAssessment =
+      (document.getElementById("consent1") as HTMLInputElement | null)
+        ?.checked ?? false;
+    const consentResearch =
+      (document.getElementById("consent2") as HTMLInputElement | null)
+        ?.checked ?? false;
+    const consentAccuracy =
+      (document.getElementById("consent3") as HTMLInputElement | null)
+        ?.checked ?? false;
+
+    const consentGivenBy =
+      (document.getElementById("consentGivenBy") as HTMLInputElement | null)
+        ?.value ?? "";
+    const consentDateTime =
+      (document.getElementById("consentDateTime") as HTMLInputElement | null)
+        ?.value ?? "";
+
+    const fatherDetails = fatherRef.current?.getData();
+    const motherDetails = motherRef.current?.getData();
+    const guardianDetails = guardianRef.current?.getData();
+    const birthMedicalInfo = birthRef.current?.getData();
+    const developmentalInfo = developmentalRef.current?.getData();
+
+    const formData = {
+      examinerName: examinerName ?? "",
+      examinerProfession: examinerProfession ?? "",
+      fullName: fullName ?? "",
+      gender,
+      dob,
+      age,
+      motherTongue,
+      knownLanguages,
+      languageOfInstruction:
+        selectedLanguage === "Others" ? customLanguage : selectedLanguage,
+      readingLanguage: Reading === "Others" ? customReading : Reading,
+      writingLanguage: Writing === "Others" ? customWriting : Writing,
+      height,
+      weight,
+      bmi,
+      visionStatus,
+      visionAids: {
+        glasses: visionAidsGlasses,
+        lenses: visionAidsLenses,
+        others: othersEye,
+      },
+      hearingStatus,
+      hearingAid,
+      othersEar,
+      breadwinner,
+      hasSiblings,
+      visionProblem,
+      residentialType,
+      schoolName,
+      classSection,
+      schoolAddress,
+      educationType,
+      schoolType,
+      schoolBoard,
+      supportStaff,
+      schoolScreenUse,
+      schoolScreenDuration,
+      extracurricular,
+      extracurricularDetails,
+      screenTimeHome,
+      consent: {
+        assessment: consentAssessment,
+        research: consentResearch,
+        accuracy: consentAccuracy,
+        givenBy: consentGivenBy,
+        dateTime: consentDateTime,
+      },
+      fatherDetails,
+      motherDetails,
+      guardianDetails,
+      birthMedicalInfo,
+      developmentalInfo,
+    };
+
+    localStorage.setItem("DCVPA_Form_Data", JSON.stringify(formData));
+    try {
+      const registrationId = await handleFirestoreSave(formData);
+
+      alert(`Form saved! Registration ID: ${registrationId}`);
+      localStorage.setItem("CURRENT_VPD_ID", registrationId);
+
+      // Optional: redirect after save
+      navigate("/welcome");
+    } catch (error) {
+      if (error instanceof Error) {
+        alert("Firestore Error: " + error.message);
+      } else {
+        alert("Unknown Firestore Error");
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-form p-4 md:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -166,59 +457,106 @@ const handleAddLanguage = () => {
           <div className="bg-gradient-to-r from-primary to-primary-dark text-primary-foreground p-6">
             <div className="text-center">
               <div className="flex items-center justify-center gap-3 mb-2">
-                <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                <svg
+                  className="h-8 w-8"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
                 </svg>
-                <h1 className="text-2xl md:text-3xl font-bold"> DIGITALIZED COMPREHENSIVE VISUAL PERCEPTION ASSESSMENT- CHILDREN (DCVPA-C)</h1>
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  DIGITALIZED COMPREHENSIVE VISUAL PERCEPTION ASSESSMENT-
+                  CHILDREN (DCVPA-C)
+                </h1>
               </div>
-              <p className="text-primary-foreground/90">
-                Registration Form
-              </p>
+              <p className="text-primary-foreground/90">Registration Form</p>
             </div>
           </div>
         </div>
 
-        <form className="space-y-6" onKeyDown={(e) => {
+        <form
+          className="space-y-6"
+          onKeyDown={(e) => {
             if (e.key === "Enter") e.preventDefault();
-            }}>
+          }}
+          onSubmit={handleSubmit}
+        >
+          {/* Examiner Profile */}
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
             <div className="p-6 border-b border-form-border">
               <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
-               Examiner Profile
+                Examiner Profile
               </h2>
             </div>
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="Examiner_name" className="block text-sm font-medium text-gray-700">Examiner Name *</label>
-                  <input 
-                    type="text" 
-                    id="Examiner_name" 
-                    placeholder="Enter Examiner name" 
+                  <label
+                    htmlFor="Examiner_name"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Examiner Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="Examiner_name"
+                    placeholder="Enter Examiner name"
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="examiner_profession" className="block text-sm font-medium text-gray-700">Examiner Profession *</label>
-                  <input 
-                    type="text" 
-                    id="examiner_profession" 
-                    placeholder="Enter Examiner Profession" 
+                  <label
+                    htmlFor="examiner_profession"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Examiner Profession *
+                  </label>
+                  <input
+                    type="text"
+                    id="examiner_profession"
+                    placeholder="Enter Examiner Profession"
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
               </div>
-           </div>
+            </div>
           </div>
-          {/* Personal Details */}
+
+          {/* Demographic Profile */}
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-primary">
             <div className="p-6 border-b border-form-border">
               <h2 className="text-xl font-semibold text-form-header flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
                 </svg>
                 Demographic Profile
               </h2>
@@ -226,27 +564,49 @@ const handleAddLanguage = () => {
             <div className="p-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name *</label>
-                  <input 
-                    type="text" 
-                    id="fullName" 
-                    placeholder="Enter full name" 
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="fullName"
+                    placeholder="Enter full name"
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Gender *</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Gender *
+                  </label>
                   <div className="flex gap-6">
                     <label className="flex items-center">
-                      <input type="radio" name="gender" value="male" className="mr-2 text-primary" />
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        className="mr-2 text-primary"
+                      />
                       Male
                     </label>
                     <label className="flex items-center">
-                      <input type="radio" name="gender" value="female" className="mr-2 text-primary" />
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        className="mr-2 text-primary"
+                      />
                       Female
                     </label>
                     <label className="flex items-center">
-                      <input type="radio" name="gender" value="other" className="mr-2 text-primary" />
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="other"
+                        className="mr-2 text-primary"
+                      />
                       Other
                     </label>
                   </div>
@@ -255,17 +615,27 @@ const handleAddLanguage = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="dob" className="block text-sm font-medium text-gray-700">Date of Birth *</label>
-                  <input 
-                    type="date" 
+                  <label
+                    htmlFor="dob"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Date of Birth *
+                  </label>
+                  <input
+                    type="date"
                     id="dob"
-                    value={dob} 
-                    onChange={(e) => { setDob(e.target.value); calculateAge(e.target.value); }}
+                    value={dob}
+                    onChange={(e) => {
+                      setDob(e.target.value);
+                      calculateAge(e.target.value);
+                    }}
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Calculated Chronological Age</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Calculated Chronological Age
+                  </label>
                   <div className="p-3 bg-accent-light rounded-md border">
                     <span className="inline-block px-2 py-1 bg-secondary text-secondary-foreground rounded text-sm">
                       {age || "Enter date of birth"}
@@ -274,226 +644,298 @@ const handleAddLanguage = () => {
                 </div>
               </div>
 
+              {/* Mother Tongue & Other Known Languages */}
               <div className="space-y-2">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mother Tongue*
-                    </label>
-                    <select
-                      value={motherTongue}
-                      onChange={(e) => setMotherTongue(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                    >
-                      <option value="">Select Mother Tongue</option>
-                      {INDIAN_LANGUAGES.map((lang) => (
-                        <option key={lang} value={lang}>
-                          {lang}
-                        </option>
-                      ))}
-                      <option value="Other">Other</option>
-                    </select>
-                    {motherTongue === "Other" && (
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mother Tongue*
+                  </label>
+                  <select
+                    value={motherTongue}
+                    onChange={(e) => setMotherTongue(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Select Mother Tongue</option>
+                    {INDIAN_LANGUAGES.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                    <option value="Other">Other</option>
+                  </select>
+                  {motherTongue === "Other" && (
+                    <input
+                      type="text"
+                      placeholder="Enter Mother Tongue"
+                      className="mt-2 w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Other Known Languages
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {!showCustomInput ? (
+                      <select
+                        value={selectedLang}
+                        onChange={handleDropdownChange}
+                        className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">Select a language</option>
+                        {INDIAN_LANGUAGES.map((lang) => (
+                          <option key={lang} value={lang}>
+                            {lang}
+                          </option>
+                        ))}
+                        <option value="Others">Others</option>
+                      </select>
+                    ) : (
                       <input
                         type="text"
-                        placeholder="Enter Mother Tongue"
-                        className="mt-2 w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Enter custom language"
+                        value={customKnownLanguage}
+                        onChange={(e) => setCustomKnownLanguage(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     )}
+                    <button
+                      type="button"
+                      onClick={handleAddLanguage}
+                      className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    >
+                      Add
+                    </button>
                   </div>
 
-                  {/* Other Known Languages */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Other Known Languages
-                    </label>
-
-                    <div className="flex items-center gap-2">
-                      {!showCustomInput ? (
-                        <select
-                          value={selectedLang}
-                          onChange={handleDropdownChange}
-                          className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                          <option value="">Select a language</option>
-                          {INDIAN_LANGUAGES.map((lang) => (
-                            <option key={lang} value={lang}>
-                              {lang}
-                            </option>
-                          ))}
-                          <option value="Others">Others</option>
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          placeholder="Enter custom language"
-                          value={customKnownLanguage}
-                          onChange={(e) => setCustomKnownLanguage(e.target.value)}
-                          onKeyDown={handleKeyDown}
-                          className="flex-grow px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                        />
-                      )}
-                      <button
-                        type="button"
-                        onClick={handleAddLanguage}
-                        className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {knownLanguages.map((lang) => (
+                      <span
+                        key={lang}
+                        className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
                       >
-                        Add
-                      </button>
-                    </div>
-
-                    {/* Show Added Tags */}
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {knownLanguages.map((lang) => (
-                        <span
-                          key={lang}
-                          className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                        {lang}
+                        <button
+                          type="button"
+                          onClick={() => handleRemove(lang)}
+                          className="text-blue-500 hover:text-blue-700 font-bold"
                         >
-                          {lang}
-                          <button
-                            type="button"
-                            onClick={() => handleRemove(lang)}
-                            className="text-blue-500 hover:text-blue-700 font-bold"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                    </div>
+                          ×
+                        </button>
+                      </span>
+                    ))}
                   </div>
+                </div>
+              </div>
+
+              {/* Language & Physical Info */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Medium of Instruction in School *
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={selectedLanguage}
+                  onChange={handleLanguage}
+                >
+                  <option value="">Select primary language</option>
+                  {INDIAN_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                  <option value="Others">Other</option>
+                </select>
+                {selectedLanguage === "Others" && (
+                  <input
+                    type="text"
+                    id="language"
+                    value={customLanguage}
+                    onChange={handleCustomChange}
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                )}
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Medium of Instruction in School *</label>
-                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    value={selectedLanguage}
-                    onChange={handleLanguage}
+                <label className="block text-sm font-medium text-gray-700">
+                  Language Comprehension in Reading *
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={Reading}
+                  onChange={handleReading}
                 >
                   <option value="">Select primary language</option>
-                    {INDIAN_LANGUAGES.map((lang) =>
-                    (
-                      <option value={lang}>{lang}</option>
-                    ))
-                    }
-                    <option value="Others">Other</option>
-                  </select>
-                  {selectedLanguage === 'Others' && (
-                    <input 
-                      type="text" 
-                      id="language"
-                      value={customLanguage} 
-                      onChange={handleCustomChange}
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  )}
+                  {INDIAN_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                  <option value="Others">Other</option>
+                </select>
+                {Reading === "Others" && (
+                  <input
+                    type="text"
+                    id="language"
+                    value={customReading}
+                    onChange={handleCustomReading}
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                )}
               </div>
+
               <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Language Comprehension in Reading *</label>
-                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    value={Reading}
-                    onChange={handleReading}
+                <label className="block text-sm font-medium text-gray-700">
+                  Language Comprehension in Writing *
+                </label>
+                <select
+                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  value={Writing}
+                  onChange={handleWriting}
                 >
                   <option value="">Select primary language</option>
-                    {INDIAN_LANGUAGES.map((lang) =>
-                    (
-                      <option value={lang}>{lang}</option>
-                    ))
-                    }
-                    <option value="Others">Other</option>
-                  </select>
-                  {Reading === 'Others' && (
-                    <input 
-                      type="text" 
-                      id="language"
-                      value={customReading} 
-                      onChange={handleCustomReading}
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  )}
+                  {INDIAN_LANGUAGES.map((lang) => (
+                    <option key={lang} value={lang}>
+                      {lang}
+                    </option>
+                  ))}
+                  <option value="Others">Other</option>
+                </select>
+                {Writing === "Others" && (
+                  <input
+                    type="text"
+                    id="language"
+                    value={customWriting}
+                    onChange={handleCustomWriting}
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                )}
               </div>
-              <div className="space-y-2">
-                <label htmlFor="language" className="block text-sm font-medium text-gray-700">Language Comprehension in Writing *</label>
-                <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    value={Writing}
-                    onChange={handleWriting}
-                >
-                  <option value="">Select primary language</option>
-                    {INDIAN_LANGUAGES.map((lang) =>
-                    (
-                      <option value={lang}>{lang}</option>
-                    ))
-                    }
-                    <option value="Others">Other</option>
-                  </select>
-                  {Writing === 'Others' && (
-                    <input 
-                      type="text" 
-                      id="language"
-                      value={customWriting} 
-                      onChange={handleCustomWriting}
-                      className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                    />
-                  )}
-              </div>
+
               <div className="border-t border-gray-200 pt-4">
-                <h4 className="font-semibold text-form-header mb-3">Physical Information</h4>
-                <div className="grid md:grid-cols-2 gap-4"></div>
+                <h4 className="font-semibold text-form-header mb-3">
+                  Physical Information
+                </h4>
+
                 <div className="space-y-2">
-                  <label htmlFor="height" className="block text-sm font-medium text-gray-700">Height (cm) *</label>
-                  <input 
-                    type="number" 
+                  <label
+                    htmlFor="height"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Height (cm) *
+                  </label>
+                  <input
+                    type="number"
                     id="height"
                     placeholder="Height in cm"
-                    value={height} 
-                    onChange={(e) => { setHeight(e.target.value); calculateBMI(); }}
+                    value={height}
+                    onChange={(e) => {
+                      setHeight(e.target.value);
+                      calculateBMI();
+                    }}
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700">Weight (kg) *</label>
-                  <input 
-                    type="number" 
+                  <label
+                    htmlFor="weight"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Weight (kg) *
+                  </label>
+                  <input
+                    type="number"
                     id="weight"
                     placeholder="Weight in kg"
-                    value={weight} 
-                    onChange={(e) => { setWeight(e.target.value); calculateBMI(); }}
+                    value={weight}
+                    onChange={(e) => {
+                      setWeight(e.target.value);
+                      calculateBMI();
+                    }}
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
+
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700"> Body Mass Index (BMI)</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Body Mass Index (BMI)
+                  </label>
                   <div className="p-3 bg-accent-light rounded-md border">
-                    {bmi && (
+                    {bmi ? (
                       <div className="flex flex-col gap-1">
                         <span className="inline-block px-2 py-1 bg-gray-100 border rounded text-sm font-medium">
                           BMI: {bmi}
                         </span>
-                        <span className={`inline-block px-2 py-1 rounded text-xs text-green-500 ${getBMICategory(parseFloat(bmi)).color}`}>
+                        <span
+                          className={`inline-block px-2 py-1 rounded text-xs text-green-500 ${
+                            getBMICategory(parseFloat(bmi)).color
+                          }`}
+                        >
                           {getBMICategory(parseFloat(bmi)).category}
                         </span>
                       </div>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">
+                        Enter height & weight
+                      </span>
                     )}
-                    {!bmi && <span className="text-muted-foreground text-sm">Enter height & weight</span>}
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <label htmlFor="visionStatus" className="block text-sm font-medium text-gray-700">Vision Status</label>
-                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <label
+                    htmlFor="visionStatus"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Vision Status
+                  </label>
+                  <select
+                    id="visionStatus"
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
                     <option value="">Select vision status</option>
                     <option value="normal">Normal</option>
                     <option value="not Assessed yet">Needs Checkup</option>
                     <option value="unknown">Unknown</option>
                   </select>
                 </div>
+
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Visual Aids</label>
-                  <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
-                    <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">Wears Glasses</label>
-                    <input type="checkbox" id="lenses" className="text-primary" />
-                    <label htmlFor="lenses" className="text-sm">Wears Contact Lenses</label>
-                    <input type="checkbox" id="OthersEye" className="text-primary" checked={othersEye} onChange={(e)=>setOthersEye(e.target.checked)}/>
-                    <label htmlFor="OthersEye" className="text-sm">Others</label>
-                    { othersEye && (
+                  <label className="block text-sm font-medium text-gray-700">
+                    Visual Aids
+                  </label>
+                  <div className="flex flex-wrap items-center gap-2 p-3 border border-input-border rounded-md">
+                    <input
+                      type="checkbox"
+                      id="glasses"
+                      className="text-primary"
+                    />
+                    <label htmlFor="glasses" className="text-sm">
+                      Wears Glasses
+                    </label>
+                    <input
+                      type="checkbox"
+                      id="lenses"
+                      className="text-primary"
+                    />
+                    <label htmlFor="lenses" className="text-sm">
+                      Wears Contact Lenses
+                    </label>
+                    <input
+                      type="checkbox"
+                      id="OthersEye"
+                      className="text-primary"
+                      checked={othersEye}
+                      onChange={(e) => setOthersEye(e.target.checked)}
+                    />
+                    <label htmlFor="OthersEye" className="text-sm">
+                      Others
+                    </label>
+                    {othersEye && (
                       <input
                         type="text"
                         placeholder="Please specify"
@@ -502,23 +944,49 @@ const handleAddLanguage = () => {
                     )}
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <label htmlFor="HearingStatus" className="block text-sm font-medium text-gray-700">Hearing Status</label>
-                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <label
+                    htmlFor="HearingStatus"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Hearing Status
+                  </label>
+                  <select
+                    id="HearingStatus"
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
                     <option value="">Select Hearing status</option>
                     <option value="normal">Normal</option>
                     <option value="not Assessed yet">Needs Checkup</option>
                     <option value="unknown">Unknown</option>
                   </select>
                 </div>
+
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Hearing Aids</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Hearing Aids
+                  </label>
                   <div className="flex items-center space-x-2 p-3 border border-input-border rounded-md">
-                    <input type="checkbox" id="glasses" className="text-primary" />
-                    <label htmlFor="glasses" className="text-sm">Wears Hearing Aids</label>
-                    <input type="checkbox" id="othersEar" className="text-primary" checked={othersEar} onChange={(e)=>setOthersEar(e.target.checked)}/>
-                    <label htmlFor="othersEar" className="text-sm">Others</label>
-                    { othersEar && (
+                    <input
+                      type="checkbox"
+                      id="hearingAid"
+                      className="text-primary"
+                    />
+                    <label htmlFor="hearingAid" className="text-sm">
+                      Wears Hearing Aids
+                    </label>
+                    <input
+                      type="checkbox"
+                      id="othersEar"
+                      className="text-primary"
+                      checked={othersEar}
+                      onChange={(e) => setOthersEar(e.target.checked)}
+                    />
+                    <label htmlFor="othersEar" className="text-sm">
+                      Others
+                    </label>
+                    {othersEar && (
                       <input
                         type="text"
                         placeholder="Please specify"
@@ -528,26 +996,44 @@ const handleAddLanguage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Family Demographic Profile */}
               <div className="border-t border-gray-200 pt-4">
-                <h4 className="font-semibold text-form-header mb-3">3. Family Demographic Profile</h4>
+                <h4 className="font-semibold text-form-header mb-3">
+                  3. Family Demographic Profile
+                </h4>
                 <div className="space-y-2">
-                  <label htmlFor="breadwinner" className="block text-sm font-medium text-gray-700">Breadwinner of the Family</label>
-                  <select className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                  <label
+                    htmlFor="breadwinner"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Breadwinner of the Family
+                  </label>
+                  <select
+                    id="breadwinner"
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  >
                     <option value="">Select</option>
                     <option value="Father">Father</option>
                     <option value="Mother">Mother</option>
                     <option value="Others">Others</option>
                   </select>
                 </div>
+
                 <div className="mt-3">
-                    <UserDetails sectionTitle='Father Details'></UserDetails>
+                  <UserDetails sectionTitle="Father Details" ref={fatherRef} />
                 </div>
                 <div className="mt-3">
-                    <UserDetails sectionTitle='Mothers Details'></UserDetails>
+                  <UserDetails sectionTitle="Mothers Details" ref={motherRef} />
                 </div>
                 <div className="mt-3">
-                    <UserDetails sectionTitle='Guardian Details'></UserDetails>
+                  <UserDetails
+                    sectionTitle="Guardian Details"
+                    ref={guardianRef}
+                  />
                 </div>
+
+                {/* Additional Personal Details */}
                 <div className="p-6 bg-white rounded-2xl shadow-md space-y-4 mt-6 border border-gray-200">
                   <h2 className="text-xl font-semibold text-blue-600 mb-2">
                     Additional Personal Details
@@ -582,7 +1068,9 @@ const handleAddLanguage = () => {
                     {hasSiblings === "Yes" && (
                       <div className="flex flex-col md:flex-row md:space-x-4 mt-2">
                         <div className="flex-1 flex flex-col">
-                          <label className="font-medium mb-1">Sibling Type:</label>
+                          <label className="font-medium mb-1">
+                            Sibling Type:
+                          </label>
                           <select className="border rounded-lg px-3 py-2">
                             <option value="">Select Type</option>
                             <option>Older</option>
@@ -591,7 +1079,9 @@ const handleAddLanguage = () => {
                           </select>
                         </div>
                         <div className="flex-1 flex flex-col mt-3 md:mt-0">
-                          <label className="font-medium mb-1">Number of Siblings:</label>
+                          <label className="font-medium mb-1">
+                            Number of Siblings:
+                          </label>
                           <input
                             type="number"
                             placeholder="Enter number"
@@ -604,7 +1094,9 @@ const handleAddLanguage = () => {
 
                   {/* Vision Problems */}
                   <div className="flex flex-col">
-                    <label className="font-medium mb-1">History of Vision Problems:</label>
+                    <label className="font-medium mb-1">
+                      History of Vision Problems:
+                    </label>
                     <div className="flex items-center space-x-4">
                       <label className="flex items-center space-x-1">
                         <input
@@ -643,7 +1135,10 @@ const handleAddLanguage = () => {
                   {/* Marital Status */}
                   <div className="flex flex-col">
                     <label className="font-medium mb-1">Marital Status:</label>
-                    <select className="border rounded-lg px-3 py-2">
+                    <select
+                      name="marital"
+                      className="border rounded-lg px-3 py-2"
+                    >
                       <option value="">Select Status</option>
                       <option>Single</option>
                       <option>Married</option>
@@ -654,8 +1149,13 @@ const handleAddLanguage = () => {
 
                   {/* Socioeconomic Status */}
                   <div className="flex flex-col">
-                    <label className="font-medium mb-1">Socioeconomic Status:</label>
-                    <select className="border rounded-lg px-3 py-2">
+                    <label className="font-medium mb-1">
+                      Socioeconomic Status:
+                    </label>
+                    <select
+                      name="socio"
+                      className="border rounded-lg px-3 py-2"
+                    >
                       <option value="">Select Status</option>
                       <option>Upper</option>
                       <option>Upper Middle</option>
@@ -667,7 +1167,9 @@ const handleAddLanguage = () => {
 
                   {/* Residential Address */}
                   <div className="flex flex-col">
-                    <label className="font-medium mb-1">Residential Address:</label>
+                    <label className="font-medium mb-1">
+                      Residential Address:
+                    </label>
                     <div className="flex items-center space-x-6 mb-3">
                       <label className="flex items-center space-x-1">
                         <input
@@ -693,14 +1195,18 @@ const handleAddLanguage = () => {
 
                     <div className="flex flex-col md:flex-row md:space-x-4">
                       <div className="flex-1 flex flex-col">
-                        <label className="font-medium mb-1">Permanent Address:</label>
+                        <label className="font-medium mb-1">
+                          Permanent Address:
+                        </label>
                         <textarea
                           placeholder="Enter permanent address"
                           className="border rounded-lg px-3 py-2"
                         ></textarea>
                       </div>
                       <div className="flex-1 flex flex-col mt-3 md:mt-0">
-                        <label className="font-medium mb-1">Local Address:</label>
+                        <label className="font-medium mb-1">
+                          Local Address:
+                        </label>
                         <textarea
                           placeholder="Enter local address"
                           className="border rounded-lg px-3 py-2"
@@ -713,27 +1219,40 @@ const handleAddLanguage = () => {
             </div>
           </div>
 
-          {/* Physical Information */}
-          <div className="bg-white ">
-            <BirthAndMedicalInfo></BirthAndMedicalInfo>
+          {/* Birth & Medical Info */}
+          <div className="bg-white">
+            <BirthAndMedicalInfo ref={birthRef} />
           </div>
-      
 
-          {/* School Details */}
+          {/* School Profile */}
           <div className="bg-white rounded-lg shadow-md border-l-4 border-l-warning">
             <div className="p-6 border-b border-form-border">
               <h4 className="text-lg font-semibold text-black flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                  />
                 </svg>
                 6. School Profile
               </h4>
             </div>
 
             <div className="p-6 space-y-4 text-black">
-              {/* School Name */}
               <div className="space-y-2">
-                <label htmlFor="schoolName" className="block text-sm font-medium text-black">School Name *</label>
+                <label
+                  htmlFor="schoolName"
+                  className="block text-sm font-medium text-black"
+                >
+                  School Name *
+                </label>
                 <input
                   type="text"
                   id="schoolName"
@@ -742,9 +1261,13 @@ const handleAddLanguage = () => {
                 />
               </div>
 
-              {/* Class & Section */}
               <div className="space-y-2">
-                <label htmlFor="classSection" className="block text-sm font-medium text-black">Class & Section *</label>
+                <label
+                  htmlFor="classSection"
+                  className="block text-sm font-medium text-black"
+                >
+                  Class & Section *
+                </label>
                 <input
                   type="text"
                   id="classSection"
@@ -753,9 +1276,13 @@ const handleAddLanguage = () => {
                 />
               </div>
 
-              {/* School Address */}
               <div className="space-y-2">
-                <label htmlFor="schoolAddress" className="block text-sm font-medium text-black">School Address</label>
+                <label
+                  htmlFor="schoolAddress"
+                  className="block text-sm font-medium text-black"
+                >
+                  School Address
+                </label>
                 <textarea
                   id="schoolAddress"
                   placeholder="Enter school address"
@@ -764,9 +1291,13 @@ const handleAddLanguage = () => {
                 ></textarea>
               </div>
 
-              {/* Type of Education */}
               <div className="space-y-2">
-                <label htmlFor="educationType" className="block text-sm font-medium text-black">Type of Education</label>
+                <label
+                  htmlFor="educationType"
+                  className="block text-sm font-medium text-black"
+                >
+                  Type of Education
+                </label>
                 <select
                   id="educationType"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -778,9 +1309,13 @@ const handleAddLanguage = () => {
                 </select>
               </div>
 
-              {/* If Mainstream */}
               <div className="space-y-2">
-                <label htmlFor="schoolType" className="block text-sm font-medium text-black">If Mainstream, specify</label>
+                <label
+                  htmlFor="schoolType"
+                  className="block text-sm font-medium text-black"
+                >
+                  If Mainstream, specify
+                </label>
                 <select
                   id="schoolType"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -791,9 +1326,13 @@ const handleAddLanguage = () => {
                 </select>
               </div>
 
-              {/* Board Type */}
               <div className="space-y-2">
-                <label htmlFor="schoolBoard" className="block text-sm font-medium text-black">If Mainstream, specify board</label>
+                <label
+                  htmlFor="schoolBoard"
+                  className="block text-sm font-medium text-black"
+                >
+                  If Mainstream, specify board
+                </label>
                 <select
                   id="schoolBoard"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -805,9 +1344,13 @@ const handleAddLanguage = () => {
                 </select>
               </div>
 
-              {/* Support Staff */}
               <div className="space-y-2">
-                <label htmlFor="supportStaff" className="block text-sm font-medium text-black">Support Staff Assigned (if any)</label>
+                <label
+                  htmlFor="supportStaff"
+                  className="block text-sm font-medium text-black"
+                >
+                  Support Staff Assigned (if any)
+                </label>
                 <input
                   type="text"
                   id="supportStaff"
@@ -816,27 +1359,45 @@ const handleAddLanguage = () => {
                 />
               </div>
 
-              {/* Screen Use */}
               <div className="space-y-2">
-                <label className="block text-sm font-medium text-black">Screen use in school setting</label>
+                <label className="block text-sm font-medium text-black">
+                  Screen use in school setting
+                </label>
                 <div className="flex items-center space-x-4">
                   <label className="flex items-center">
-                    <input type="radio" name="screenUse" value="yes" className="mr-2" /> Yes
+                    <input
+                      type="radio"
+                      name="screenUse"
+                      value="yes"
+                      className="mr-2"
+                    />{" "}
+                    Yes
                   </label>
                   <label className="flex items-center">
-                    <input type="radio" name="screenUse" value="no" className="mr-2" /> No
+                    <input
+                      type="radio"
+                      name="screenUse"
+                      value="no"
+                      className="mr-2"
+                    />{" "}
+                    No
                   </label>
                 </div>
                 <input
                   type="number"
+                  data-role="school-screen-duration"
                   placeholder="If yes, duration (hours)"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
 
-              {/* Purpose of Use */}
               <div className="space-y-2">
-                <label htmlFor="purposeUse" className="block text-sm font-medium text-black">Purpose of use</label>
+                <label
+                  htmlFor="purposeUse"
+                  className="block text-sm font-medium text-black"
+                >
+                  Purpose of use
+                </label>
                 <div className="flex flex-wrap gap-4">
                   <label className="flex items-center">
                     <input type="checkbox" className="mr-2" /> Watching
@@ -853,30 +1414,31 @@ const handleAddLanguage = () => {
                 </div>
               </div>
             </div>
-            <div className="space-y-2  p-6 border-t border-form-border">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  7. Extracurricular Activities
-                </h3>
-                <label className="block text-sm font-medium text-gray-700">
-                  Participation in extracurricular activities
-                </label>
-                <div className="flex items-center space-x-6">
-                  <label className="flex items-center space-x-1">
-                    <input type="radio" name="extracurricular" value="yes" />
-                    <span>Yes</span>
-                  </label>
-                  <label className="flex items-center space-x-1">
-                    <input type="radio" name="extracurricular" value="no" />
-                    <span>No</span>
-                  </label>
-                </div>
-                <input
-                  type="text"
-                  placeholder="If yes, specify activities"
-                  className="w-full mt-2 px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
 
-              {/* Screen Time at Home */}
+            <div className="space-y-2  p-6 border-t border-form-border">
+              <h3 className="text-lg font-semibold text-gray-800">
+                7. Extracurricular Activities
+              </h3>
+              <label className="block text-sm font-medium text-gray-700">
+                Participation in extracurricular activities
+              </label>
+              <div className="flex items-center space-x-6">
+                <label className="flex items-center space-x-1">
+                  <input type="radio" name="extracurricular" value="yes" />
+                  <span>Yes</span>
+                </label>
+                <label className="flex items-center space-x-1">
+                  <input type="radio" name="extracurricular" value="no" />
+                  <span>No</span>
+                </label>
+              </div>
+              <input
+                id="extracurricular_details"
+                type="text"
+                placeholder="If yes, specify activities"
+                className="w-full mt-2 px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+
               <div className="space-y-2 pt-4">
                 <h3 className="text-lg font-semibold text-gray-800">
                   8. History of Screentime Exposure at Home
@@ -919,6 +1481,7 @@ const handleAddLanguage = () => {
                     <span>Others</span>
                   </label>
                 </div>
+
                 <label className="block text-sm font-medium text-gray-700">
                   Purpose of Use
                 </label>
@@ -949,42 +1512,71 @@ const handleAddLanguage = () => {
             </div>
           </div>
 
-
-          <DevelopmentalDisorderInfo></DevelopmentalDisorderInfo>
+          {/* Developmental Info */}
+          <DevelopmentalDisorderInfo ref={developmentalRef} />
 
           {/* Consent */}
           <div className="bg-white rounded-lg shadow-md border-2 border-primary/20">
             <div className="p-6 border-b border-form-border">
-              <h4 className="text-lg font-semibold text-black">7. Consent & Authorization</h4>
+              <h4 className="text-lg font-semibold text-black">
+                7. Consent & Authorization
+              </h4>
             </div>
 
             <div className="p-6 space-y-4">
               <div className="space-y-4">
                 <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
-                  <input type="checkbox" id="consent1" className="mt-1 text-primary" />
-                  <label htmlFor="consent1" className="text-sm leading-relaxed text-black">
-                    I give consent for my child to undergo the Digitalized Comprehensive Visual Perception Assessment-Children (DCVPA-C).
+                  <input
+                    type="checkbox"
+                    id="consent1"
+                    className="mt-1 text-primary"
+                  />
+                  <label
+                    htmlFor="consent1"
+                    className="text-sm leading-relaxed text-black"
+                  >
+                    I give consent for my child to undergo the Digitalized
+                    Comprehensive Visual Perception Assessment-Children
+                    (DCVPA-C).
                   </label>
                 </div>
 
                 <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
-                  <input type="checkbox" id="consent2" className="mt-1 text-primary" />
-                  <label htmlFor="consent2" className="text-sm leading-relaxed text-black">
-                    I give consent to use the assessment results for clinical, academic, and/or research purposes.
+                  <input
+                    type="checkbox"
+                    id="consent2"
+                    className="mt-1 text-primary"
+                  />
+                  <label
+                    htmlFor="consent2"
+                    className="text-sm leading-relaxed text-black"
+                  >
+                    I give consent to use the assessment results for clinical,
+                    academic, and/or research purposes.
                   </label>
                 </div>
 
                 <div className="flex items-start space-x-3 p-4 bg-gray-100 rounded-lg">
-                  <input type="checkbox" id="consent3" className="mt-1 text-primary" />
-                  <label htmlFor="consent3" className="text-sm leading-relaxed text-black">
-                    I confirm that all information provided is accurate and complete to the best of my knowledge.
+                  <input
+                    type="checkbox"
+                    id="consent3"
+                    className="mt-1 text-primary"
+                  />
+                  <label
+                    htmlFor="consent3"
+                    className="text-sm leading-relaxed text-black"
+                  >
+                    I confirm that all information provided is accurate and
+                    complete to the best of my knowledge.
                   </label>
                 </div>
 
-                {/* Consent Given By Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
                   <div>
-                    <label htmlFor="consentGivenBy" className="block text-sm font-medium text-black mb-1">
+                    <label
+                      htmlFor="consentGivenBy"
+                      className="block text-sm font-medium text-black mb-1"
+                    >
                       Consent Given By
                     </label>
                     <input
@@ -997,7 +1589,10 @@ const handleAddLanguage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="consentDateTime" className="block text-sm font-medium text-black mb-1">
+                    <label
+                      htmlFor="consentDateTime"
+                      className="block text-sm font-medium text-black mb-1"
+                    >
                       Date & Time
                     </label>
                     <input
@@ -1013,17 +1608,36 @@ const handleAddLanguage = () => {
             </div>
           </div>
 
-
-          {/* Submit Button */}
+          {/* Submit */}
           <div className="flex justify-center pt-6">
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="px-12 py-3 text-lg font-semibold text-primary-foreground bg-gradient-to-r from-primary to-primary-dark rounded-lg hover:from-primary-dark hover:to-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 shadow-lg"
             >
               Submit Assessment Form
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Print Saved Data */}
+      <div className="flex justify-center pt-4">
+        <button
+          type="button"
+          onClick={() => {
+            const data = localStorage.getItem("DCVPA_Form_Data");
+            if (!data) {
+              alert("No saved data found!");
+              return;
+            }
+            const parsed = JSON.parse(data);
+            console.log("Saved Form Data:", parsed);
+            window.print();
+          }}
+          className="px-8 py-3 text-lg font-semibold bg-black text-white rounded-lg"
+        >
+          Print Saved Data
+        </button>
       </div>
     </div>
   );

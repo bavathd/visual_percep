@@ -1,54 +1,90 @@
-// ✅ Save a score with timestamp
-export const saveScore = (
-  username: string,
+import { db } from "../utils/firebasesdk";
+import { doc, setDoc, getDoc,collection, getDocs } from "firebase/firestore";
+
+// Generate today's date as YYYY-MM-DD
+const getTodayDate = () => {
+  return new Date().toISOString().split("T")[0];
+};
+
+/**
+ * ✅ Save score to Firestore
+ * Path:
+ * scores → VPDxxx → YYYY-MM-DD → gameName → "Level X"
+ */
+export const saveScore = async (
+  vpdId: string,
   gameName: string,
   level: number,
   score: number,
-  timestamp: number,
+  durationMs: number,
 ) => {
-  const key = `scores_${username}_${gameName}`;
-  const existing = JSON.parse(localStorage.getItem(key) || "{}");
+  const date = getTodayDate();
+  const durationSec = Math.round(durationMs / 1000);
+  const scoreRef = doc(db, "scores", vpdId, date, gameName);
 
-  existing[`Level ${level}`] = {
-    score,
-    timestamp,
-  };
+  try {
+    await setDoc(
+      scoreRef,
+      {
+        [`Level ${level}`]: {
+          score,
+          timestamp: durationSec,
+        },
+      },
+      { merge: true }
+    );
 
-  localStorage.setItem(key, JSON.stringify(existing));
-  console.log(
-    `✅ Saved ${username}'s ${gameName} - Level ${level}: ${score} at ${new Date().toLocaleString()}`
-  );
+    console.log(`🔥 Saved score for ${vpdId} → ${date} → ${gameName} → Level ${level}`);
+  } catch (err) {
+    console.error("❌ Error saving score:", err);
+  }
 };
 
-// ✅ Get all level scores for a specific user and game
-export const getAllGameScores = (username: string, gameName: string) => {
-  const key = `scores_${username}_${gameName}`;
-  const scores = JSON.parse(localStorage.getItem(key) || "{}");
-  return scores;
+/**
+ * ✅ Get all scores for a specific user on a specific date
+ */
+export const getScoresByDate = async (vpdId: string, date: string) => {
+  try {
+    // ✔ VALID path: collection(scores → vpd → date)
+    const dateCollectionRef = collection(db, "scores", vpdId, date);
+
+    const snapshot = await getDocs(dateCollectionRef);
+
+    const result: Record<string, unknown> = {};
+
+    snapshot.forEach((doc) => {
+      result[doc.id] = doc.data(); // gameName → levels
+    });
+
+    return result;
+  } catch (err) {
+    console.error("❌ Error getting scores:", err);
+    return {};
+  }
+};
+/**
+ * ✅ Get all scores for a user (all dates, all games)
+ */
+export const getAllUserScores = async (vpdId: string) => {
+  const userRef = doc(db, "scores", vpdId);
+
+  try {
+    const snapshot = await getDoc(userRef);
+    return snapshot.exists() ? snapshot.data() : {};
+  } catch (err) {
+    console.error("❌ Error fetching all user scores:", err);
+    return {};
+  }
 };
 
-// ✅ Get all games and levels for a specific user
-export const getAllUserScores = (username: string) => {
-  const allKeys = Object.keys(localStorage);
-  const userGameScores: Record<string, unknown> = {};
-
-  allKeys.forEach((key) => {
-    if (key.startsWith(`scores_${username}_`)) {
-      const gameName = key.replace(`scores_${username}_`, "");
-      userGameScores[gameName] = JSON.parse(localStorage.getItem(key) || "{}");
-    }
-  });
-
-  return userGameScores;
-};
-
-// ✅ Clear all scores for a user
-export const clearAllScores = (username: string) => {
-  const allKeys = Object.keys(localStorage);
-  allKeys.forEach((key) => {
-    if (key.startsWith(`scores_${username}_`)) {
-      localStorage.removeItem(key);
-    }
-  });
-  console.log(`🧹 Cleared all scores for ${username}`);
+/**
+ * ❗ Optional: Clear all scores for a user
+ */
+export const clearAllScores = async (vpdId: string) => {
+  try {
+    await setDoc(doc(db, "scores", vpdId), {});
+    console.log(`🧹 Cleared all scores for ${vpdId}`);
+  } catch (err) {
+    console.error("❌ Error clearing scores:", err);
+  }
 };

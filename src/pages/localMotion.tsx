@@ -291,7 +291,7 @@ const LocalMotion: React.FC = () => {
             </p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/home")}
+                onClick={() => navigate("/score")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg"
               >
                 HomePage

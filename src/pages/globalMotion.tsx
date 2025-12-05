@@ -37,7 +37,7 @@ const correctImage = [
   "/level1/shapes/GMP+TR+S+CR.png",
   "/level2/objects/GMP+L1+OB+CR.png",
   "/level2/shapes/GMP+L1+SH+CR.png",
-  "/level3/objects/GMP+L2+OB+CR.png",
+  "/level3/objects/LMP+L2+OB+CR.png",
   "/level3/shapes/GMP+L2+S+CR.png",
   "/level4/objects/GMP+L3+OB+CR.png",
   "/level4/shapes/GMP+L3+SH+CR.png",
@@ -77,9 +77,9 @@ const inCorrectImage = [
   [
     // Level 3
     [
-      "/level3/objects/GMP+L2+OB+INC+1.png",
-      "/level3/objects/GMP+L2+OB+INC+2.png",
-      "/level3/objects/GMP+L2+OB+INC+3.png",
+      "/level3/objects/LMP+L2+OB+INC+1.png",
+      "/level3/objects/LMP+L2+OB+INC+2.png",
+      "/level3/objects/LMP+L2+OB+INC+3.png",
     ],
     [
       "/level3/shapes/GMP+L2+S+INC+1.png",
@@ -233,7 +233,7 @@ const GlobalMotion: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VGM Item{level}
+          Sub 1:VGM Item{level + 1}
         </div>
       </div>
 

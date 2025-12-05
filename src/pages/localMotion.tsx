@@ -238,7 +238,7 @@ const LocalMotion: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VLM Item{level}
+          Sub 1:VLM Item{level + 1}
         </div>
       </div>
 

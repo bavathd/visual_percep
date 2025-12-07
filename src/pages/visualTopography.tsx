@@ -227,7 +227,7 @@ const Topography: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VTo Item{level + 1}
+          Sub 3:VTo Item{level + 1}
         </div>
       </div>
 

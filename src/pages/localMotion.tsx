@@ -137,7 +137,7 @@ const LocalMotion: React.FC = () => {
   const navigate = useNavigate();
   const vid = localStorage.getItem("CURRENT_VPD_ID");
   useEffect(() => {
-    if (vid) {
+    if (!vid) {
       alert("No VPD ID found. Please register first.");
       navigate("/register"); // redirect to registration
     }
@@ -238,7 +238,7 @@ const LocalMotion: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VLM Item{level + 1}
+          Sub 3:VLM Item{level + 1}
         </div>
       </div>
 
@@ -294,7 +294,7 @@ const LocalMotion: React.FC = () => {
                 onClick={() => navigate("/score")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg"
               >
-                HomePage
+                Score Card
               </button>
             </div>
           </div>

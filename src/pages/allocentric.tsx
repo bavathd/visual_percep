@@ -182,7 +182,8 @@ const SpatialResolution: React.FC = () => {
     const selected = images.find((img) => img.id === id);
     if (selected?.isCorrect) {
       setCorrect((prev) => prev + 1);
-      console.log("✅ Correct clicked! Total correct:", correct + 1);
+
+      console.log("✅ Correct clicked! Total correct ootha", correct + 1);
     } else {
       console.log("❌ Incorrect clicked!");
     }
@@ -197,7 +198,13 @@ const SpatialResolution: React.FC = () => {
       );
     }
     if (level >= 2) {
-      saveScore(vid, "Allocentric", level + 1 - 2, correct, durationMs);
+      saveScore(
+        vid,
+        "Spatial Relationships",
+        level + 1 - 2,
+        correct,
+        durationMs
+      );
     }
     nextLevel();
   };
@@ -224,11 +231,11 @@ const SpatialResolution: React.FC = () => {
         </button>
 
         <div className="text-lg font-bold text-white bg-blue-600 rounded-xl px-4 py-2">
-          Visual Spatial Resolution
+          Spatial Relationships
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VSR Item{level + 1}
+          Sub 3:VSR Item{level + 1}
         </div>
       </div>
 

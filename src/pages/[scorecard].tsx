@@ -5,7 +5,7 @@ import { getScoresByDate } from "../utils/scoreStorage";
 
 interface GameLevel {
   score: number;
-  duration: number;
+  timestamp: number;
 }
 
 interface DomainScores {
@@ -35,28 +35,35 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, items }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 text-sm">
         {items.map((item) => (
           <div key={item.itemNo} className="p-3 border rounded-xl bg-gray-50">
-            <p className="font-medium mb-1">Item {item.itemNo}</p>
+            <p className="font-medium mb-2">Level {item.itemNo}</p>
 
-            <label className="block mb-1">Correct:</label>
-            <select
-              className="w-full p-2 border rounded bg-gray-100"
-              disabled
-              defaultValue={
-                item.correct === null ? "-" : item.correct ? "Correct" : "Wrong"
-              }
-            >
-              <option value="-">-</option>
-              <option value="Correct">Correct</option>
-              <option value="Wrong">Wrong</option>
-            </select>
+            {/* CORRECT / INCORRECT */}
+            <div className="mb-1">
+              <span className="font-semibold">Correct:</span>{" "}
+              <span
+                className={
+                  item.correct === null
+                    ? "text-gray-600"
+                    : item.correct
+                    ? "text-green-600 font-bold"
+                    : "text-red-600 font-bold"
+                }
+              >
+                {item.correct === null
+                  ? "-"
+                  : item.correct
+                  ? "Correct"
+                  : "Wrong"}
+              </span>
+            </div>
 
-            <label className="block mt-2 mb-1">Response Time (sec):</label>
-            <input
-              type="number"
-              className="w-full p-2 border rounded bg-gray-100"
-              value={item.responseTime ?? ""}
-              disabled
-            />
+            {/* RESPONSE TIME */}
+            <div>
+              <span className="font-semibold">Response Time:</span>{" "}
+              <span className="text-black">
+                {item.responseTime !== null ? `${item.responseTime} sec` : "-"}
+              </span>
+            </div>
           </div>
         ))}
       </div>
@@ -130,7 +137,7 @@ const ScoreCard: React.FC = () => {
             itemNo: index + 1,
             correct:
               levelData?.score !== undefined ? levelData.score > 0 : null,
-            responseTime: levelData?.duration ?? null,
+            responseTime: levelData?.timestamp ?? null,
           };
         });
       });
@@ -177,42 +184,77 @@ const ScoreCard: React.FC = () => {
     });
 
     // ---------------------------
-    // APPENDIX 2
+    // PER DOMAIN LEVEL DETAILS
+    // ---------------------------
+    domains.forEach((domain, domainIndex) => {
+      doc.addPage();
+      doc.setFontSize(16);
+      doc.text(`${domain} — Level Details`, 14, 20);
+
+      const levelRows = data[domainIndex].map((item) => [
+        item.itemNo,
+        item.correct === null ? "-" : item.correct ? "Correct" : "Wrong",
+        item.responseTime !== null ? item.responseTime : "-",
+      ]);
+
+      autoTable(doc, {
+        startY: 30,
+        head: [["Level", "Correct", "Response Time (sec)"]],
+        body: levelRows,
+      });
+    });
+
+    // ---------------------------
+    // APPENDIX 2 (FINAL SECTION)
     // ---------------------------
     doc.addPage();
-    doc.setFontSize(16);
+    doc.setFontSize(18);
     doc.text("Appendix 2 — Raw & Time Scores", 14, 20);
 
-    const sectionRows: (string | number)[][] = [];
+    const foundation = [0, 2, 4, 6];
+    const objectBased = [8, 10, 1];
+    const spaceMotion = [3, 5, 7, 9, 11];
 
-    const pushRows = (title: string, indexes: number[]) => {
-      sectionRows.push([title, "", "", "", ""]);
-
-      indexes.forEach((idx) => {
+    const buildRows = (indexes: number[]) => {
+      return indexes.map((idx) => {
         const correct = data[idx].filter((i) => i.correct).length;
         const time = data[idx].reduce(
           (sum, i) => sum + (i.responseTime || 0),
           0
         );
 
-        sectionRows.push([
+        return [
           domains[idx],
           correct,
           10,
           ((correct / 10) * 100).toFixed(1) + "%",
           time,
-        ]);
+        ];
       });
     };
 
-    pushRows("VISUAL FOUNDATION SKILLS", [0, 2, 4, 6]);
-    pushRows("OBJECT-BASED VISUAL SKILLS", [8, 10, 1]);
-    pushRows("SPACE & MOTION SKILLS", [3, 5, 7, 9, 11]);
+    const appendixRows = [
+      ["VISUAL FOUNDATION SKILLS", "", "", "", ""],
+      ...buildRows(foundation),
+
+      ["FOUNDATION TOTAL", "", "", "", ""],
+
+      ["OBJECT-BASED VISUAL SKILLS", "", "", "", ""],
+      ...buildRows(objectBased),
+
+      ["OBJECT-BASED TOTAL", "", "", "", ""],
+
+      ["SPACE & MOTION VISUAL SKILLS", "", "", "", ""],
+      ...buildRows(spaceMotion),
+
+      ["SPACE & MOTION TOTAL", "", "", "", ""],
+    ];
 
     autoTable(doc, {
-      startY: 40, // <-- FIXED so it doesn’t overlap title
+      startY: 30,
       head: [["Domain", "Correct", "Total", "Accuracy", "Time"]],
-      body: sectionRows,
+      body: appendixRows,
+      styles: { fontSize: 10 },
     });
 
     doc.save(`VPD-${vpdId}-Full-Report.pdf`);

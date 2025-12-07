@@ -33,7 +33,7 @@ async function generateRegistrationId(): Promise<string> {
   }
 
   const padded = String(newSerial).padStart(3, "0");
-  return `VPD${padded}`;
+  return `VP${padded}`;
 }
 
 async function handleFirestoreSave(
@@ -50,7 +50,7 @@ async function handleFirestoreSave(
 
       transaction.set(docRef, {
         registrationId,
-        serial: parseInt(registrationId.replace("VPD", "")),
+        serial: parseInt(registrationId.replace("VP", "")),
         adminEmail,
         createdAt: serverTimestamp(),
         ...formData,
@@ -149,6 +149,12 @@ const VisualPerceptionForm: React.FC = () => {
       const bmiValue = w / (h * h);
       setBmi(bmiValue.toFixed(2));
     }
+  };
+  const getLocalDateTime = () => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const local = new Date(now.getTime() - offset * 60000);
+    return local.toISOString().slice(0, 16);
   };
 
   const getBMICategory = (bmiValue: number) => {
@@ -1599,7 +1605,7 @@ const VisualPerceptionForm: React.FC = () => {
                       type="datetime-local"
                       id="consentDateTime"
                       name="consentDateTime"
-                      defaultValue={new Date().toISOString().slice(0, 16)}
+                      defaultValue={getLocalDateTime()}
                       className="w-full border border-gray-400 rounded-md p-2 text-black"
                     />
                   </div>

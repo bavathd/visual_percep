@@ -228,7 +228,7 @@ const VisualClosure: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 2:VC Item{level + 1}
+          Sub 7:VC Item{level + 1}
         </div>
       </div>
 

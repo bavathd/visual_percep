@@ -234,7 +234,7 @@ const VisualDiscrimination: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 1:VD Item{level + 1}
+          Sub 4:VD Item{level + 1}
         </div>
       </div>
 

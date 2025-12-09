@@ -22,6 +22,7 @@ import ProtectedAdminRoute from "./utils/auth/protectedAdminRoute";
 import { AdminAuthProvider } from "./utils/auth/adminAuthProvider";
 import ProtectedVPDRoute from "./utils/auth/protectedVPDRoute";
 import AdminSignup from "./pages/adminSignup";
+import MotionSpeed from "./pages/motionspeed";
 
 const AppRoutes = () => {
   return useRoutes([
@@ -173,6 +174,17 @@ const AppRoutes = () => {
         <ProtectedAdminRoute>
           <ProtectedVPDRoute>
             <EyeTrackingVideo />
+          </ProtectedVPDRoute>
+        </ProtectedAdminRoute>
+      ),
+    },
+
+    {
+      path: "/ms",
+      element: (
+        <ProtectedAdminRoute>
+          <ProtectedVPDRoute>
+            <MotionSpeed />
           </ProtectedVPDRoute>
         </ProtectedAdminRoute>
       ),

@@ -61,7 +61,7 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, items }) => {
             <div>
               <span className="font-semibold">Response Time:</span>{" "}
               <span className="text-black">
-                {item.responseTime !== null ? `${item.responseTime} sec` : "-"}
+                {item.responseTime !== null ? `${item.responseTime} ms` : "-"}
               </span>
             </div>
           </div>
@@ -71,19 +71,20 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, items }) => {
   );
 };
 const domains = [
-  "Visual Attention",
-  "Visual Closure",
-  "Visual Tracking",
-  "Spatial Relationships",
-  "Visual Discrimination",
-  "Topography",
-  "Visual Memory",
-  "Global Motion Perception",
-  "Visual Figure Ground",
-  "Local Motion Perception",
-  "Visual Form Constancy",
-  "Motion Speed",
+  "Visual Attention", // VA
+  "Visual Memory", // VM
+  "Visual Tracking", // VT
+  "Visual Discrimination", // VD
+  "Visual Form Constancy", // VFC
+  "Visual Figure Ground", // VFG
+  "Visual Closure", // VC
+  "Spatial Relationships", // VSR
+  "Topography", // VTo
+  "Global Motion Perception", // VGM
+  "Local Motion Perception", // VLM
+  "Motion Speed", // VMS
 ] as const;
+
 const ScoreCard: React.FC = () => {
   const pageRef = useRef<HTMLDivElement>(null);
 
@@ -163,7 +164,7 @@ const ScoreCard: React.FC = () => {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("Visual Perception Full Report", 14, 20);
+    doc.text("Digitalized Comprehensive Visual Perception Score Card", 14, 20);
 
     doc.setFontSize(12);
     doc.text(`VPD ID: ${vpdId}`, 14, 30);
@@ -199,7 +200,7 @@ const ScoreCard: React.FC = () => {
 
       autoTable(doc, {
         startY: 30,
-        head: [["Level", "Correct", "Response Time (sec)"]],
+        head: [["Level", "Correct", "Response Time (milli sec)"]],
         body: levelRows,
       });
     });
@@ -351,7 +352,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <th className="p-2 text-center">Correct</th>
             <th className="p-2 text-center">Total Items</th>
             <th className="p-2 text-center">Accuracy %</th>
-            <th className="p-2 text-center">Total Time (sec)</th>
+            <th className="p-2 text-center">Total Time (milli sec)</th>
           </tr>
         </thead>
 

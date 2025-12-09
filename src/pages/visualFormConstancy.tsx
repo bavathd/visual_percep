@@ -233,7 +233,7 @@ const FormConstancy: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 2:VFC Item{level + 1}
+          Sub 5:VFC Item{level + 1}
         </div>
       </div>
 

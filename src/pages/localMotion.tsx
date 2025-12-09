@@ -238,7 +238,7 @@ const LocalMotion: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 3:VLM Item{level + 1}
+          Sub 11:VLM Item{level + 1}
         </div>
       </div>
 
@@ -291,10 +291,10 @@ const LocalMotion: React.FC = () => {
             </p>
             <div className="space-y-3">
               <button
-                onClick={() => navigate("/score")}
+                onClick={() => navigate("/ms")}
                 className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-lg"
               >
-                Score Card
+                Next Assessment
               </button>
             </div>
           </div>

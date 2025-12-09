@@ -236,7 +236,7 @@ const VisualFigureGround: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-white rounded-xl px-4 py-2">
-          Sub 2:VFG Item{level + 1}
+          Sub 6:VFG Item{level + 1}
         </div>
       </div>
 

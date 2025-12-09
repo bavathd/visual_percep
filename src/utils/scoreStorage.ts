@@ -19,7 +19,7 @@ export const saveScore = async (
   durationMs: number,
 ) => {
   const date = getTodayDate();
-  const durationSec = Math.round(durationMs / 1000);
+  const durationSec = durationMs;
   const scoreRef = doc(db, "scores", vpdId, date, gameName);
 
   try {

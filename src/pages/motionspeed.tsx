@@ -8,18 +8,28 @@ import {
 import { saveScore } from "../utils/scoreStorage";
 
 const correctVideoBase =
-  "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/motion/correct/";
-const wrongVideoBase =
-  "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/motion/wrong/";
+  "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/Motion+Speed/";
 
 const TOTAL_LEVELS = 10;
-
+const correctSide: ("left" | "right")[] = [
+  "left", // Level 1
+  "left", // Level 2
+  "left", // Level 3
+  "right", // Level 4
+  "right", // Level 5
+  "right", // Level 6
+  "left", // Level 7
+  "left", // Level 8
+  "left", // Level 9
+  "right", // Level 10
+  "right", // Level 11
+  "right", // Level 12
+];
 const MotionSpeed: React.FC = () => {
   const navigate = useNavigate();
   const vid = localStorage.getItem("CURRENT_VPD_ID");
 
   const [level, setLevel] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
   const [clicked, setClicked] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -41,7 +51,6 @@ const MotionSpeed: React.FC = () => {
 
     setClicked(true);
     if (isCorrect) {
-      setCorrectCount((c) => c + 1);
       console.log("✔ Correct");
     } else {
       console.log("✖ Wrong");
@@ -54,7 +63,7 @@ const MotionSpeed: React.FC = () => {
     saveScore(vid!, "Motion Speed", level + 1, isCorrect ? 1 : 0, durationMs);
 
     // Move next
-    setTimeout(() => nextLevel(), 600);
+    nextLevel();
   };
 
   const nextLevel = () => {
@@ -83,46 +92,36 @@ const MotionSpeed: React.FC = () => {
         </div>
 
         <div className="text-lg font-bold text-blue-800 rounded-xl px-4 py-2">
-          Level {level + 1}/{TOTAL_LEVELS}
+          Sub 12:VMS Item{level + 1}
         </div>
       </div>
 
       {/* GAME AREA */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg p-6 flex items-center justify-center">
-        <div className="grid grid-cols-2 gap-6 w-full">
-          {/* CORRECT VIDEO */}
-          <div
-            onClick={() => handleAnswer(true)}
-            className={`cursor-pointer rounded-xl overflow-hidden shadow-lg border-4 transition ${
-              clicked ? "opacity-50" : "hover:scale-105"
-            }`}
-          >
-            <video
-              key={`correct-${level}`}
-              src={`${correctVideoBase}${level + 1}.mp4`}
-              autoPlay
-              loop
-              muted
-              className="w-full h-full object-cover"
-            />
-          </div>
+      {/* GAME AREA */}
+      <div className="flex-1 bg-white rounded-xl shadow-lg p-6 flex items-center justify-center relative">
+        {/* SINGLE MERGED VIDEO */}
+        <video
+          key={`ms-${level}`}
+          src={`${correctVideoBase}${level + 1}.mp4`}
+          autoPlay
+          loop
+          muted
+          className="w-full h-full object-contain rounded-xl"
+        />
 
-          {/* WRONG VIDEO */}
+        {/* TOUCH OVERLAY */}
+        <div className="absolute inset-0 grid grid-cols-2">
+          {/* LEFT SIDE */}
           <div
-            onClick={() => handleAnswer(false)}
-            className={`cursor-pointer rounded-xl overflow-hidden shadow-lg border-4 transition ${
-              clicked ? "opacity-50" : "hover:scale-105"
-            }`}
-          >
-            <video
-              key={`wrong-${level}`}
-              src={`${wrongVideoBase}${level + 1}.mp4`}
-              autoPlay
-              loop
-              muted
-              className="w-full h-full object-cover"
-            />
-          </div>
+            onClick={() => handleAnswer(correctSide[level] === "left")}
+            className="cursor-pointer"
+          />
+
+          {/* RIGHT SIDE */}
+          <div
+            onClick={() => handleAnswer(correctSide[level] === "right")}
+            className="cursor-pointer"
+          />
         </div>
       </div>
 
@@ -133,18 +132,11 @@ const MotionSpeed: React.FC = () => {
             <h2 className="text-2xl font-bold text-blue-700 mb-4">
               Assessment Complete
             </h2>
-            <p className="text-lg mb-4">
-              Correct Answers:{" "}
-              <b>
-                {correctCount} / {TOTAL_LEVELS}
-              </b>
-            </p>
-
             <button
-              onClick={() => navigate("/top")}
+              onClick={() => navigate("/score")}
               className="w-full bg-green-600 text-white py-3 rounded-lg mb-3"
             >
-              Next Assessment
+              Score Card
             </button>
 
             <button

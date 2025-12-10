@@ -13,17 +13,17 @@ const correctVideoBase =
 const TOTAL_LEVELS = 10;
 const correctSide: ("left" | "right")[] = [
   "left", // Level 1
-  "left", // Level 2
-  "left", // Level 3
+  "right", // Level 2
+  "right", // Level 3
   "right", // Level 4
-  "right", // Level 5
-  "right", // Level 6
-  "left", // Level 7
-  "left", // Level 8
-  "left", // Level 9
-  "right", // Level 10
-  "right", // Level 11
-  "right", // Level 12
+  "left", // Level 5
+  "left", // Level 6
+  "left", // Level 1
+  "right", // Level 2
+  "right", // Level 3
+  "right", // Level 4
+  "left", // Level 5
+  "left", // Level 6
 ];
 const MotionSpeed: React.FC = () => {
   const navigate = useNavigate();

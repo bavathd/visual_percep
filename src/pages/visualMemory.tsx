@@ -252,24 +252,34 @@ const VisualMemory: React.FC = () => {
 
         {/* Option Images */}
         {!showFlash && (
-          <div className="w-full flex justify-center items-center mb-6">
-            <div className="grid grid-cols-4 md:grid-cols-4 gap-1 w-full mt-[15%] justify-between items-center">
-              {images.map(({ id, src, clicked }) => (
-                <div
-                  key={id}
-                  onClick={() => handleClick(id)}
-                  className={`bg-white max-w-[60%] rounded-xl p-2 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
-                    clicked ? "opacity-50" : ""
-                  }`}
-                >
-                  <img
-                    src={src}
-                    alt="Option"
-                    className="w-96 h-auto object-contain rounded"
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="flex justify-center items-center w-full gap-6 mt-4">
+            {images.map(({ id, src, clicked }) => (
+              <div
+                key={id}
+                onClick={() => handleClick(id)}
+                className={`
+              bg-white rounded-xl shadow-xl cursor-pointer 
+              transition-all duration-300 
+              hover:scale-110 
+              ${clicked ? "opacity-50" : ""}
+            `}
+                style={{
+                  width: "250px",
+                  height: "250px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "10px",
+                }}
+              >
+                <img
+                  src={src}
+                  alt="Option"
+                  className="object-contain rounded"
+                  style={{ width: "100%", height: "100%" }}
+                />
+              </div>
+            ))}
           </div>
         )}
       </div>

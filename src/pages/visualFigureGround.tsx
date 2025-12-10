@@ -253,19 +253,31 @@ const VisualFigureGround: React.FC = () => {
           </div>
 
           {/* Options (Bottom Row) */}
-          <div className="grid grid-cols-4 gap-2 justify-items-center w-full">
+          <div className="flex justify-center items-center w-full gap-6 mt-4">
             {images.map(({ id, src, clicked }) => (
               <div
                 key={id}
                 onClick={() => handleClick(id)}
-                className={`bg-white rounded-xl p-2 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer ${
-                  clicked ? "opacity-50" : ""
-                }`}
+                className={`
+              bg-white rounded-xl shadow-xl cursor-pointer 
+              transition-all duration-300 
+              hover:scale-110 
+              ${clicked ? "opacity-50" : ""}
+            `}
+                style={{
+                  width: "250px",
+                  height: "250px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "10px",
+                }}
               >
                 <img
                   src={src}
                   alt="Option"
-                  className="w-100 h-100 object-contain rounded"
+                  className="object-contain rounded"
+                  style={{ width: "100%", height: "100%" }}
                 />
               </div>
             ))}

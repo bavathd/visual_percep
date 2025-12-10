@@ -69,7 +69,7 @@ const MotionSpeed: React.FC = () => {
   const nextLevel = () => {
     resetLevelTimer();
 
-    if (level < 12) {
+    if (level + 1 < 12) {
       setLevel(level + 1);
     } else {
       setShowModal(true);
@@ -98,8 +98,18 @@ const MotionSpeed: React.FC = () => {
 
       {/* GAME AREA */}
       {/* GAME AREA */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg p-6 flex items-center justify-center relative">
-        {/* SINGLE MERGED VIDEO */}
+      <div
+        className="flex items-center justify-center bg-white rounded-xl shadow-lg relative"
+        style={{
+          width: "100%",
+          height: "calc(100vh - 180px)", // fixed non-scrollable area
+          paddingLeft: "10px",
+          paddingRight: "10px",
+          paddingBottom: "10px",
+          overflow: "hidden", // prevent scrolling
+        }}
+      >
+        {/* MERGED VIDEO */}
         <video
           key={`ms-${level}`}
           src={`${correctVideoBase}${level + 1}.mp4`}

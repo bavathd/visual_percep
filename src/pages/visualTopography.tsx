@@ -197,7 +197,7 @@ const Topography: React.FC = () => {
       );
     }
     if (level >= 2) {
-      saveScore(vid, "Topography", level + 1 - 2, correct, durationMs);
+      saveScore(vid, "Visual Topography", level + 1 - 2, correct, durationMs);
     }
     nextLevel();
   };

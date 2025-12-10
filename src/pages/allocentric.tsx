@@ -200,7 +200,7 @@ const SpatialResolution: React.FC = () => {
     if (level >= 2) {
       saveScore(
         vid,
-        "Spatial Relationships",
+        "Visual Spatial Relationships",
         level + 1 - 2,
         correct,
         durationMs

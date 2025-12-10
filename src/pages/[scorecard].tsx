@@ -73,13 +73,12 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, items }) => {
 const domains = [
   "Visual Attention", // VA
   "Visual Memory", // VM
-  "Visual Tracking", // VT
   "Visual Discrimination", // VD
   "Visual Form Constancy", // VFC
   "Visual Figure Ground", // VFG
   "Visual Closure", // VC
-  "Spatial Relationships", // VSR
-  "Topography", // VTo
+  "Visual Spatial Relationships", // VSR
+  "Visual Topography", // VTo
   "Global Motion Perception", // VGM
   "Local Motion Perception", // VLM
   "Motion Speed", // VMS
@@ -170,12 +169,12 @@ const ScoreCard: React.FC = () => {
     doc.text(`VPD ID: ${vpdId}`, 14, 30);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 38);
 
-    // ---------------------------
+    // =========================================================
     // SUMMARY TABLE
-    // ---------------------------
+    // =========================================================
     const summaryRows = domains.map((domain, index) => {
       const { correct, totalTime } = calculateDomainScore(data[index]);
-      return [domain, `${correct}/10`, `${totalTime}s`];
+      return [domain, `${correct}/10`, `${totalTime} ms`];
     });
 
     autoTable(doc, {
@@ -184,9 +183,9 @@ const ScoreCard: React.FC = () => {
       body: summaryRows,
     });
 
-    // ---------------------------
-    // PER DOMAIN LEVEL DETAILS
-    // ---------------------------
+    // =========================================================
+    // LEVEL DETAILS PER DOMAIN
+    // =========================================================
     domains.forEach((domain, domainIndex) => {
       doc.addPage();
       doc.setFontSize(16);
@@ -200,64 +199,117 @@ const ScoreCard: React.FC = () => {
 
       autoTable(doc, {
         startY: 30,
-        head: [["Level", "Correct", "Response Time (milli sec)"]],
+        head: [["Level", "Correct", "Response Time (ms)"]],
         body: levelRows,
       });
     });
 
-    // ---------------------------
-    // APPENDIX 2 (FINAL SECTION)
-    // ---------------------------
+    // =========================================================
+    // APPENDIX 2 TOTAL CALCULATIONS
+    // =========================================================
+    const foundation = [0, 1, 2];
+    const objectBased = [3, 4, 5];
+    const spaceMotion = [6, 7, 8, 9, 10];
+
+    const pdfSum = (indexes: number[]) => {
+      let correct = 0;
+      let time = 0;
+
+      indexes.forEach((idx) => {
+        const items = data[idx];
+        items.forEach((item) => {
+          if (item.correct) correct++;
+          if (item.responseTime) time += item.responseTime;
+        });
+      });
+
+      return { correct, total: indexes.length * 10, time };
+    };
+
+    const fTotal = pdfSum(foundation);
+    const oTotal = pdfSum(objectBased);
+    const sTotal = pdfSum(spaceMotion);
+
+    const grandCorrect = fTotal.correct + oTotal.correct + sTotal.correct;
+    const grandTotal = fTotal.total + oTotal.total + sTotal.total;
+    const grandTime = fTotal.time + oTotal.time + sTotal.time;
+    const grandAccuracy = (grandCorrect / grandTotal).toFixed(3);
+
+    // =========================================================
+    // APPENDIX 2 PDF TABLE
+    // =========================================================
     doc.addPage();
     doc.setFontSize(18);
     doc.text("Appendix 2 — Raw & Time Scores", 14, 20);
 
-    const foundation = [0, 2, 4, 6];
-    const objectBased = [8, 10, 1];
-    const spaceMotion = [3, 5, 7, 9, 11];
-
-    const buildRows = (indexes: number[]) => {
-      return indexes.map((idx) => {
-        const correct = data[idx].filter((i) => i.correct).length;
-        const time = data[idx].reduce(
-          (sum, i) => sum + (i.responseTime || 0),
-          0
-        );
-
-        return [
-          domains[idx],
-          correct,
-          10,
-          ((correct / 10) * 100).toFixed(1) + "%",
-          time,
-        ];
-      });
-    };
-
-    const appendixRows = [
+    const appendixTableRows = [
       ["VISUAL FOUNDATION SKILLS", "", "", "", ""],
-      ...buildRows(foundation),
-
-      ["FOUNDATION TOTAL", "", "", "", ""],
+      ...foundation.map((idx) => {
+        const items = data[idx];
+        const correct = items.filter((i) => i.correct).length;
+        const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
+        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+      }),
+      [
+        "FOUNDATION TOTAL",
+        fTotal.correct,
+        fTotal.total,
+        (fTotal.correct / fTotal.total).toFixed(3),
+        fTotal.time,
+      ],
 
       ["OBJECT-BASED VISUAL SKILLS", "", "", "", ""],
-      ...buildRows(objectBased),
-
-      ["OBJECT-BASED TOTAL", "", "", "", ""],
+      ...objectBased.map((idx) => {
+        const items = data[idx];
+        const correct = items.filter((i) => i.correct).length;
+        const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
+        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+      }),
+      [
+        "OBJECT-BASED TOTAL",
+        oTotal.correct,
+        oTotal.total,
+        (oTotal.correct / oTotal.total).toFixed(3),
+        oTotal.time,
+      ],
 
       ["SPACE & MOTION VISUAL SKILLS", "", "", "", ""],
-      ...buildRows(spaceMotion),
+      ...spaceMotion.map((idx) => {
+        const items = data[idx];
+        const correct = items.filter((i) => i.correct).length;
+        const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
+        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+      }),
+      [
+        "SPACE & MOTION TOTAL",
+        sTotal.correct,
+        sTotal.total,
+        (sTotal.correct / sTotal.total).toFixed(3),
+        sTotal.time,
+      ],
 
-      ["SPACE & MOTION TOTAL", "", "", "", ""],
+      // ======================
+      // GRAND TOTAL
+      // ======================
+      [
+        "Visual Perception Total Score",
+        grandCorrect,
+        grandTotal,
+        grandAccuracy,
+        grandTime,
+      ],
     ];
 
     autoTable(doc, {
-      startY: 30,
-      head: [["Domain", "Correct", "Total", "Accuracy", "Time"]],
-      body: appendixRows,
+      startY: 35,
+      head: [["Domain", "Correct", "Total", "Accuracy", "Time (ms)"]],
+      body: appendixTableRows,
       styles: { fontSize: 10 },
     });
 
+    // =========================================================
+    // SAVE PDF
+    // =========================================================
     doc.save(`VPD-${vpdId}-Full-Report.pdf`);
   };
 
@@ -315,9 +367,9 @@ interface AppendixProps {
 
 const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
   // Domain index groups
-  const foundation = [0, 2, 4, 6];
-  const objectBased = [8, 10, 1];
-  const spaceMotion = [3, 5, 7, 9, 11];
+  const foundation = [0, 1, 2];
+  const objectBased = [3, 4, 5];
+  const spaceMotion = [6, 7, 8, 9, 10];
 
   const sum = (indexes: number[]) => {
     let correct = 0;
@@ -339,6 +391,16 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
   const objectTotals = sum(objectBased);
   const spaceTotals = sum(spaceMotion);
 
+  // GRAND TOTALS FOR ALL DOMAINS
+  const grandCorrect =
+    foundationTotals.correct + objectTotals.correct + spaceTotals.correct;
+  const grandTotal =
+    foundationTotals.total + objectTotals.total + spaceTotals.total;
+  const grandTime =
+    foundationTotals.time + objectTotals.time + spaceTotals.time;
+
+  const grandAccuracy = (grandCorrect / grandTotal).toFixed(3);
+
   return (
     <div className="p-6 bg-white shadow rounded-2xl mt-8">
       <h2 className="text-2xl font-bold mb-4">
@@ -351,7 +413,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <th className="p-2">Domain</th>
             <th className="p-2 text-center">Correct</th>
             <th className="p-2 text-center">Total Items</th>
-            <th className="p-2 text-center">Accuracy %</th>
+            <th className="p-2 text-center">Accuracy</th>
             <th className="p-2 text-center">Total Time (milli sec)</th>
           </tr>
         </thead>
@@ -373,9 +435,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
                 <td className="p-2">{domains[idx]}</td>
                 <td className="p-2 text-center">{correct}</td>
                 <td className="p-2 text-center">10</td>
-                <td className="p-2 text-center">
-                  {((correct / 10) * 100).toFixed(1)}%
-                </td>
+                <td className="p-2 text-center">{(correct / 10).toFixed(3)}</td>
                 <td className="p-2 text-center">{time}</td>
               </tr>
             );
@@ -386,11 +446,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <td className="p-2 text-center">{foundationTotals.correct}</td>
             <td className="p-2 text-center">{foundationTotals.total}</td>
             <td className="p-2 text-center">
-              {(
-                (foundationTotals.correct / foundationTotals.total) *
-                100
-              ).toFixed(1)}
-              %
+              {(foundationTotals.correct / foundationTotals.total).toFixed(3)}
             </td>
             <td className="p-2 text-center">{foundationTotals.time}</td>
           </tr>
@@ -424,7 +480,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <td className="p-2 text-center">{objectTotals.correct}</td>
             <td className="p-2 text-center">{objectTotals.total}</td>
             <td className="p-2 text-center">
-              {((objectTotals.correct / objectTotals.total) * 100).toFixed(1)}%
+              {(objectTotals.correct / objectTotals.total).toFixed(3)}
             </td>
             <td className="p-2 text-center">{objectTotals.time}</td>
           </tr>
@@ -446,7 +502,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
                 <td className="p-2 text-center">{correct}</td>
                 <td className="p-2 text-center">10</td>
                 <td className="p-2 text-center">
-                  {((correct / 10) * 100).toFixed(1)}%
+                  {((correct / 10) * 100).toFixed(3)}
                 </td>
                 <td className="p-2 text-center">{time}</td>
               </tr>
@@ -458,9 +514,16 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <td className="p-2 text-center">{spaceTotals.correct}</td>
             <td className="p-2 text-center">{spaceTotals.total}</td>
             <td className="p-2 text-center">
-              {((spaceTotals.correct / spaceTotals.total) * 100).toFixed(1)}%
+              {(spaceTotals.correct / spaceTotals.total).toFixed(3)}
             </td>
             <td className="p-2 text-center">{spaceTotals.time}</td>
+          </tr>
+          <tr className="font-bold bg-yellow-100">
+            <td className="p-2">Visual Perception Total Score</td>
+            <td className="p-2 text-center">{grandCorrect}</td>
+            <td className="p-2 text-center">{grandTotal}</td>
+            <td className="p-2 text-center">{grandAccuracy}</td>
+            <td className="p-2 text-center">{grandTime}</td>
           </tr>
         </tbody>
       </table>

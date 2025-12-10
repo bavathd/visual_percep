@@ -69,7 +69,7 @@ const MotionSpeed: React.FC = () => {
   const nextLevel = () => {
     resetLevelTimer();
 
-    if (level < TOTAL_LEVELS - 1) {
+    if (level < 12) {
       setLevel(level + 1);
     } else {
       setShowModal(true);

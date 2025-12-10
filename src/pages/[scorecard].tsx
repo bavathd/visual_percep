@@ -468,7 +468,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
                 <td className="p-2 text-center">{correct}</td>
                 <td className="p-2 text-center">10</td>
                 <td className="p-2 text-center">
-                  {((correct / 10) * 100).toFixed(1)}%
+                  {((correct / 10) * 100).toFixed(3)}
                 </td>
                 <td className="p-2 text-center">{time}</td>
               </tr>
@@ -501,9 +501,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
                 <td className="p-2">{domains[idx]}</td>
                 <td className="p-2 text-center">{correct}</td>
                 <td className="p-2 text-center">10</td>
-                <td className="p-2 text-center">
-                  {((correct / 10) * 100).toFixed(3)}
-                </td>
+                <td className="p-2 text-center">{(correct / 10).toFixed(3)}</td>
                 <td className="p-2 text-center">{time}</td>
               </tr>
             );

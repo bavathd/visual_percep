@@ -10,7 +10,6 @@ import { saveScore } from "../utils/scoreStorage";
 const correctVideoBase =
   "https://assetsperception.s3.ap-south-1.amazonaws.com/assets/Motion+Speed/";
 
-const TOTAL_LEVELS = 10;
 const correctSide: ("left" | "right")[] = [
   "left", // Level 1
   "right", // Level 2
@@ -59,9 +58,10 @@ const MotionSpeed: React.FC = () => {
     const durationMs = stopLevelTimer();
     console.log(`⏱ Time taken: ${durationMs} ms`);
 
-    // Save score for this level
-    saveScore(vid!, "Motion Speed", level + 1, isCorrect ? 1 : 0, durationMs);
-
+    if (level + 1 >= 2) {
+      // Save score for this level
+      saveScore(vid!, "Motion Speed", level + 1, isCorrect ? 1 : 0, durationMs);
+    }
     // Move next
     nextLevel();
   };

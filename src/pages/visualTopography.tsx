@@ -263,18 +263,18 @@ const Topography: React.FC = () => {
               ${clicked ? "opacity-50" : ""}
             `}
                 style={{
-                  width: "250px",
+                  width: "500px",
                   height: "250px",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  padding: "10px",
+                  padding: "3px",
                 }}
               >
                 <img
                   src={src}
                   alt="Option"
-                  className="object-contain rounded"
+                  className="object-contain rounded shadow-xl"
                   style={{ width: "100%", height: "100%" }}
                 />
               </div>

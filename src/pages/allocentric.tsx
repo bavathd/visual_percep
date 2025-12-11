@@ -196,7 +196,7 @@ const SpatialResolution: React.FC = () => {
     if (vid && level >= 2) {
       saveScore(
         vid,
-        "Global Motion Perception",
+        "Visual Spatial Relationships",
         level + 1 - 2,
         newCorrect,
         durationMs

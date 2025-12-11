@@ -258,7 +258,7 @@ const VisualClosure: React.FC = () => {
             `}
                 style={{
                   width: "250px",
-                  height: "250px",
+                  height: "500px",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",

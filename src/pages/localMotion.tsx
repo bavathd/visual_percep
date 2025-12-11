@@ -194,7 +194,7 @@ const LocalMotion: React.FC = () => {
     if (vid && level >= 2) {
       saveScore(
         vid,
-        "Global Motion Perception",
+        "Local Motion Perception",
         level + 1 - 2,
         newCorrect,
         durationMs

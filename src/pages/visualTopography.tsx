@@ -196,7 +196,7 @@ const Topography: React.FC = () => {
     if (vid && level >= 2) {
       saveScore(
         vid,
-        "Global Motion Perception",
+        "Visual Topography",
         level + 1 - 2,
         newCorrect,
         durationMs

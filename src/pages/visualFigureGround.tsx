@@ -197,7 +197,7 @@ const VisualFigureGround: React.FC = () => {
     if (vid && level >= 2) {
       saveScore(
         vid,
-        "Global Motion Perception",
+        "Visual Figure Ground",
         level + 1 - 2,
         newCorrect,
         durationMs

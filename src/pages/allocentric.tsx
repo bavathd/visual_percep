@@ -175,49 +175,48 @@ const SpatialResolution: React.FC = () => {
   }, [level]);
 
   const handleClick = (id: string) => {
+    const selected = images.find((img) => img.id === id);
+
+    const newCorrect = selected?.isCorrect ? correct + 1 : correct;
+
     setImages((prev) =>
       prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
     );
 
-    const selected = images.find((img) => img.id === id);
     if (selected?.isCorrect) {
-      setCorrect((prev) => prev + 1);
-
-      console.log("✅ Correct clicked! Total correct ootha", correct + 1);
+      setCorrect(newCorrect);
+      console.log("✅ Correct clicked! Total correct:", newCorrect);
     } else {
       console.log("❌ Incorrect clicked!");
     }
-    const durationMs = stopLevelTimer(); // returns ms
+
+    const durationMs = stopLevelTimer();
     console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
-    console.log(`✅ Level ${level + 1}`);
-    if (!vid) {
-      return (
-        <div className="p-10 text-center text-xl font-bold">
-          Checking VPD ID...
-        </div>
-      );
-    }
-    if (level >= 2) {
+
+    if (vid && level >= 2) {
       saveScore(
         vid,
-        "Visual Spatial Relationships",
+        "Global Motion Perception",
         level + 1 - 2,
-        correct,
+        newCorrect,
         durationMs
       );
     }
+
     nextLevel();
   };
 
   const nextLevel = () => {
-    resetLevelTimer();
-    setCorrect(0);
     if (level < flashImage.length - 1) {
       console.log("Moving to next level:", level + 1);
+      resetLevelTimer();
       setLevel((prev) => prev + 1);
+
+      // Reset AFTER level changes
+      setCorrect(0);
       setShowModal(false);
     } else {
-      console.log("Game Completed! Total Correct:", correct);
+      console.log("Game Completed!");
       setShowModal(true);
     }
   };

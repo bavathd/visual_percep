@@ -58,9 +58,15 @@ const MotionSpeed: React.FC = () => {
     const durationMs = stopLevelTimer();
     console.log(`⏱ Time taken: ${durationMs} ms`);
 
-    if (level + 1 >= 2) {
+    if (level >= 2) {
       // Save score for this level
-      saveScore(vid!, "Motion Speed", level + 1, isCorrect ? 1 : 0, durationMs);
+      saveScore(
+        vid!,
+        "Motion Speed",
+        level + 1 - 2,
+        isCorrect ? 1 : 0,
+        durationMs
+      );
     }
     // Move next
     nextLevel();
@@ -69,7 +75,7 @@ const MotionSpeed: React.FC = () => {
   const nextLevel = () => {
     resetLevelTimer();
 
-    if (level + 1 < 12) {
+    if (level < 11) {
       setLevel(level + 1);
     } else {
       setShowModal(true);

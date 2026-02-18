@@ -180,7 +180,7 @@ const Topography: React.FC = () => {
     const newCorrect = selected?.isCorrect ? correct + 1 : correct;
 
     setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img)),
     );
 
     if (selected?.isCorrect) {
@@ -194,12 +194,13 @@ const Topography: React.FC = () => {
     console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
 
     if (vid && level >= 2) {
+      const levelScore = selected?.isCorrect ? 1 : 0; // ← per-level only
       saveScore(
         vid,
         "Visual Topography",
         level + 1 - 2,
-        newCorrect,
-        durationMs
+        levelScore,
+        durationMs,
       );
     }
 

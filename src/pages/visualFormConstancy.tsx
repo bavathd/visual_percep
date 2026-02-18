@@ -176,7 +176,7 @@ const FormConstancy: React.FC = () => {
 
   const handleClick = (id: string) => {
     setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img)),
     );
 
     const selected = images.find((img) => img.id === id);
@@ -197,12 +197,13 @@ const FormConstancy: React.FC = () => {
       );
     }
     if (level >= 2) {
+      const levelScore = selected?.isCorrect ? 1 : 0; // ← per-level only
       saveScore(
         vid,
         "Visual Form Constancy",
         level + 1 - 2,
-        correct,
-        durationMs
+        levelScore,
+        durationMs,
       );
     }
     nextLevel();

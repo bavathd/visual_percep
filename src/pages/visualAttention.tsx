@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface GameImage {
@@ -10,7 +10,7 @@ interface GameImage {
   isCorrect: boolean;
   size: number;
 }
-import { saveScore, getAllUserScores } from "../utils/scoreStorage";
+import { saveScore } from "../utils/scoreStorage";
 import {
   resetLevelTimer,
   startLevelTimer,
@@ -112,15 +112,20 @@ const GameScreen: React.FC = () => {
 
   const [correct, setCorrect] = useState<number>(0);
   const [images, setImages] = useState<GameImage[]>([]);
+
+  const levelCompleteRef = useRef(false);
+
   const navigate = useNavigate();
+
   useEffect(() => {
     // Start timer when new level begins
     startLevelTimer();
   }, [level, vpdId]);
 
   useEffect(() => {
+    levelCompleteRef.current = false; // ← reset on new level
     const generateUniquePositions = (
-      count: number
+      count: number,
     ): { top: number; left: number }[] => {
       const positions: { top: number; left: number }[] = [];
       while (positions.length < count) {
@@ -128,7 +133,7 @@ const GameScreen: React.FC = () => {
         const left = Math.floor(Math.random() * 95);
         const tooClose = positions.some(
           (pos) =>
-            Math.hypot(pos.top - top, pos.left - left) < 10 + Math.random() * 5
+            Math.hypot(pos.top - top, pos.left - left) < 10 + Math.random() * 5,
         );
         if (!tooClose) positions.push({ top, left });
       }
@@ -150,7 +155,7 @@ const GameScreen: React.FC = () => {
     // ✅ remaining available positions
     const availablePositions = Array.from(
       { length: totalImages },
-      (_, i) => i
+      (_, i) => i,
     ).filter((i) => !correctIndexes.has(i));
 
     // ✅ divide remaining positions among incorrect groups (exhaustively)
@@ -179,7 +184,7 @@ const GameScreen: React.FC = () => {
     if (allAssigned.size !== totalImages) {
       console.warn(
         "⚠️ Some positions unassigned!",
-        totalImages - allAssigned.size
+        totalImages - allAssigned.size,
       );
     } else {
       console.log("✅ All positions assigned:", allAssigned.size);
@@ -204,7 +209,7 @@ const GameScreen: React.FC = () => {
         } else {
           // find which group this position belongs to
           let groupIndex = incorrectPositions.findIndex((group) =>
-            group.includes(i)
+            group.includes(i),
           );
           if (groupIndex === -1) groupIndex = 0; // fallback safety
 
@@ -225,7 +230,7 @@ const GameScreen: React.FC = () => {
           isCorrect,
           size,
         } as GameImage & { size: number };
-      }
+      },
     );
 
     setImages(newImages);
@@ -239,63 +244,57 @@ const GameScreen: React.FC = () => {
   }, [count, correct]);
 
   useEffect(() => {
-    if (!vpdId) {
-      console.error("❌ No VPD ID found");
-      return;
-    }
+    if (!vpdId || levelCompleteRef.current) return;
+
     if (count >= NUMBER_OF_CORRECT[level]) {
-      const durationMs = stopLevelTimer(); // returns ms
-      console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
-      console.log(`✅ Level ${level + 1} complete with count ${count}`);
+      levelCompleteRef.current = true; // ← lock, no re-render triggered
+
+      const durationMs = stopLevelTimer();
+      const levelScore = correct > 0 ? 1 : 0;
+
       if (level >= 2) {
         saveScore(
           vpdId,
           "Visual Attention",
           level + 1 - 2,
-          correct,
-          durationMs
+          levelScore,
+          durationMs,
         );
       }
 
-      // 🎯 Check if we just finished the last level
       if (level + 1 >= 12) {
         setShowModal(true);
-        const scores = getAllUserScores(vpdId);
-        console.table(scores);
-        // Get all saved scores from localStorage
-        return; // stop here — don’t go to next level
+        return;
       }
 
-      // otherwise continue to next level
       const timer = setTimeout(() => {
-        setLevel((prev) => prev + 1);
+        levelCompleteRef.current = false; // ← unlock
         resetLevelTimer();
         setCount(0);
         setCorrect(0);
+        setLevel((prev) => prev + 1);
       }, 500);
       return () => clearTimeout(timer);
     }
   }, [count, level, correct, vpdId]);
 
   const handleClick = (id: number) => {
+    const img = images.find((i) => i.id === id);
+    if (!img || img.clicked) return; // guard against double-click
+
+    // Update images
     setImages((prevImages) =>
-      prevImages.map((img) => {
-        if (img.id === id && !img.clicked) {
-          // increment count
-          setCount((prev) => prev + 1);
-
-          if (img.isCorrect) {
-            setCorrect((prev) => prev + 1);
-            console.log(`✅ Correct image clicked: ${img.src}`);
-          } else {
-            console.log(`❌ Incorrect image clicked: ${img.src}`);
-          }
-
-          return { ...img, clicked: true };
-        }
-        return img;
-      })
+      prevImages.map((i) => (i.id === id ? { ...i, clicked: true } : i)),
     );
+
+    // Update count/correct OUTSIDE the updater — clean and safe
+    setCount((prev) => prev + 1);
+    if (img.isCorrect) {
+      setCorrect((prev) => prev + 1);
+      console.log(`✅ Correct image clicked: ${img.src}`);
+    } else {
+      console.log(`❌ Incorrect image clicked: ${img.src}`);
+    }
   };
 
   return (

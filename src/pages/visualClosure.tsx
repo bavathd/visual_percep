@@ -177,7 +177,7 @@ const VisualClosure: React.FC = () => {
 
   const handleClick = (id: string) => {
     setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img)),
     );
 
     const selected = images.find((img) => img.id === id);
@@ -198,7 +198,8 @@ const VisualClosure: React.FC = () => {
       );
     }
     if (level >= 2) {
-      saveScore(vid, "Visual Closure", level + 1 - 2, correct, durationMs);
+      const levelScore = selected?.isCorrect ? 1 : 0; // ← per-level only
+      saveScore(vid, "Visual Closure", level + 1 - 2, levelScore, durationMs);
     }
     nextLevel();
   };

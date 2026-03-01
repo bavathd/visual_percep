@@ -37,7 +37,7 @@ async function generateRegistrationId(): Promise<string> {
 }
 
 async function handleFirestoreSave(
-  formData: Record<string, unknown>
+  formData: Record<string, unknown>,
 ): Promise<string> {
   try {
     const adminEmail = auth.currentUser?.email ?? "unknown-admin";
@@ -104,10 +104,6 @@ const VisualPerceptionForm: React.FC = () => {
   const [bmi, setBmi] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [customLanguage, setCustomLanguage] = useState<string>("");
-  const [Reading, setReading] = useState("");
-  const [customReading, setCustomReading] = useState<string>("");
-  const [Writing, setWriting] = useState("");
-  const [customWriting, setCustomWriting] = useState<string>("");
   const [othersEye, setOthersEye] = useState(false);
   const [othersEar, setOthersEar] = useState(false);
   const [hasSiblings, setHasSiblings] = useState<string>("No");
@@ -118,6 +114,17 @@ const VisualPerceptionForm: React.FC = () => {
   const [selectedLang, setSelectedLang] = useState("");
   const [customKnownLanguage, setCustomKnownLanguage] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
+
+  const [readingLanguages, setReadingLanguages] = useState<string[]>([]);
+  const [selectedReadingLang, setSelectedReadingLang] = useState("");
+  const [customReadingLanguage, setCustomReadingLanguage] = useState("");
+  const [showCustomReadingInput, setShowCustomReadingInput] = useState(false);
+
+  // Writing states
+  const [writingLanguages, setWritingLanguages] = useState<string[]>([]);
+  const [selectedWritingLang, setSelectedWritingLang] = useState("");
+  const [customWritingLanguage, setCustomWritingLanguage] = useState("");
+  const [showCustomWritingInput, setShowCustomWritingInput] = useState(false);
 
   // Refs for child components
   const fatherRef = useRef<UserDetailsHandle | null>(null);
@@ -193,32 +200,53 @@ const VisualPerceptionForm: React.FC = () => {
     setCustomLanguage(e.target.value);
   };
 
-  const handleReading = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value !== "Others") {
-      setReading(value);
-      setCustomReading("");
+  const handleReadingDropdownChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const val = e.target.value;
+    if (val === "Others") {
+      setShowCustomReadingInput(true);
+      setSelectedReadingLang("");
     } else {
-      setReading("Others");
+      setSelectedReadingLang(val);
     }
   };
 
-  const handleCustomReading = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomReading(e.target.value);
+  const handleAddReadingLanguage = () => {
+    const lang = showCustomReadingInput
+      ? customReadingLanguage.trim()
+      : selectedReadingLang;
+    if (lang && !readingLanguages.includes(lang)) {
+      setReadingLanguages([...readingLanguages, lang]);
+    }
+    setSelectedReadingLang("");
+    setCustomReadingLanguage("");
+    setShowCustomReadingInput(false);
   };
 
-  const handleWriting = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (value !== "Others") {
-      setWriting(value);
-      setCustomWriting("");
+  // Writing handlers
+  const handleWritingDropdownChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const val = e.target.value;
+    if (val === "Others") {
+      setShowCustomWritingInput(true);
+      setSelectedWritingLang("");
     } else {
-      setWriting("Others");
+      setSelectedWritingLang(val);
     }
   };
 
-  const handleCustomWriting = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomWriting(e.target.value);
+  const handleAddWritingLanguage = () => {
+    const lang = showCustomWritingInput
+      ? customWritingLanguage.trim()
+      : selectedWritingLang;
+    if (lang && !writingLanguages.includes(lang)) {
+      setWritingLanguages([...writingLanguages, lang]);
+    }
+    setSelectedWritingLang("");
+    setCustomWritingLanguage("");
+    setShowCustomWritingInput(false);
   };
 
   const handleAddLanguage = () => {
@@ -264,6 +292,10 @@ const VisualPerceptionForm: React.FC = () => {
       document.getElementById("examiner_profession") as HTMLInputElement | null
     )?.value;
 
+    const licenseDetails = (
+      document.getElementById("licenseDetails") as HTMLInputElement | null
+    )?.value;
+
     const fullName = (
       document.getElementById("fullName") as HTMLInputElement | null
     )?.value;
@@ -271,7 +303,7 @@ const VisualPerceptionForm: React.FC = () => {
     const gender =
       (
         document.querySelector(
-          'input[name="gender"]:checked'
+          'input[name="gender"]:checked',
         ) as HTMLInputElement | null
       )?.value ?? "";
 
@@ -330,28 +362,28 @@ const VisualPerceptionForm: React.FC = () => {
     const schoolScreenUse =
       (
         document.querySelector(
-          'input[name="screenUse"]:checked'
+          'input[name="screenUse"]:checked',
         ) as HTMLInputElement | null
       )?.value ?? "";
 
     const schoolScreenDuration =
       (
         document.querySelector(
-          'input[data-role="school-screen-duration"]'
+          'input[data-role="school-screen-duration"]',
         ) as HTMLInputElement | null
       )?.value ?? "";
 
     const extracurricular =
       (
         document.querySelector(
-          'input[name="extracurricular"]:checked'
+          'input[name="extracurricular"]:checked',
         ) as HTMLInputElement | null
       )?.value ?? "";
 
     const extracurricularDetails =
       (
         document.getElementById(
-          "extracurricular_details"
+          "extracurricular_details",
         ) as HTMLInputElement | null
       )?.value ?? "";
 
@@ -385,6 +417,7 @@ const VisualPerceptionForm: React.FC = () => {
     const formData = {
       examinerName: examinerName ?? "",
       examinerProfession: examinerProfession ?? "",
+      licenseDetails: licenseDetails ?? "",
       fullName: fullName ?? "",
       gender,
       dob,
@@ -393,8 +426,8 @@ const VisualPerceptionForm: React.FC = () => {
       knownLanguages,
       languageOfInstruction:
         selectedLanguage === "Others" ? customLanguage : selectedLanguage,
-      readingLanguage: Reading === "Others" ? customReading : Reading,
-      writingLanguage: Writing === "Others" ? customWriting : Writing,
+      readingLanguages,
+      writingLanguages,
       height,
       weight,
       bmi,
@@ -540,6 +573,20 @@ const VisualPerceptionForm: React.FC = () => {
                     type="text"
                     id="examiner_profession"
                     placeholder="Enter Examiner Profession"
+                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="licenseDetails"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Examiner License Details *
+                  </label>
+                  <input
+                    type="text"
+                    id="licenseDetails"
+                    placeholder="Enter Examiner License Details"
                     className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
@@ -769,56 +816,131 @@ const VisualPerceptionForm: React.FC = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Language Comprehension in Reading *
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  value={Reading}
-                  onChange={handleReading}
-                >
-                  <option value="">Select primary language</option>
-                  {INDIAN_LANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
+                <div className="flex items-center gap-2">
+                  {!showCustomReadingInput ? (
+                    <select
+                      value={selectedReadingLang}
+                      onChange={handleReadingDropdownChange}
+                      className="flex-grow px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select a language</option>
+                      {INDIAN_LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                      <option value="Others">Other</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Enter custom language"
+                      value={customReadingLanguage}
+                      onChange={(e) => setCustomReadingLanguage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddReadingLanguage();
+                        }
+                      }}
+                      className="flex-grow px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAddReadingLanguage}
+                    className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {readingLanguages.map((lang) => (
+                    <span
+                      key={lang}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    >
                       {lang}
-                    </option>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setReadingLanguages(
+                            readingLanguages.filter((l) => l !== lang),
+                          )
+                        }
+                        className="text-blue-500 hover:text-blue-700 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
                   ))}
-                  <option value="Others">Other</option>
-                </select>
-                {Reading === "Others" && (
-                  <input
-                    type="text"
-                    id="language"
-                    value={customReading}
-                    onChange={handleCustomReading}
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                )}
+                </div>
               </div>
 
+              {/* Language Comprehension in Writing */}
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                   Language Comprehension in Writing *
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  value={Writing}
-                  onChange={handleWriting}
-                >
-                  <option value="">Select primary language</option>
-                  {INDIAN_LANGUAGES.map((lang) => (
-                    <option key={lang} value={lang}>
+                <div className="flex items-center gap-2">
+                  {!showCustomWritingInput ? (
+                    <select
+                      value={selectedWritingLang}
+                      onChange={handleWritingDropdownChange}
+                      className="flex-grow px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                      <option value="">Select a language</option>
+                      {INDIAN_LANGUAGES.map((lang) => (
+                        <option key={lang} value={lang}>
+                          {lang}
+                        </option>
+                      ))}
+                      <option value="Others">Other</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Enter custom language"
+                      value={customWritingLanguage}
+                      onChange={(e) => setCustomWritingLanguage(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddWritingLanguage();
+                        }
+                      }}
+                      className="flex-grow px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleAddWritingLanguage}
+                    className="shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                  >
+                    Add
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {writingLanguages.map((lang) => (
+                    <span
+                      key={lang}
+                      className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                    >
                       {lang}
-                    </option>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setWritingLanguages(
+                            writingLanguages.filter((l) => l !== lang),
+                          )
+                        }
+                        className="text-blue-500 hover:text-blue-700 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
                   ))}
-                  <option value="Others">Other</option>
-                </select>
-                {Writing === "Others" && (
-                  <input
-                    type="text"
-                    id="language"
-                    value={customWriting}
-                    onChange={handleCustomWriting}
-                    className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  />
-                )}
+                </div>
               </div>
 
               <div className="border-t border-gray-200 pt-4">
@@ -1389,12 +1511,19 @@ const VisualPerceptionForm: React.FC = () => {
                     No
                   </label>
                 </div>
-                <input
-                  type="number"
+                <select
                   data-role="school-screen-duration"
-                  placeholder="If yes, duration (hours)"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+                >
+                  <option value="">Select duration</option>
+                  <option value="0">0 hours</option>
+                  <option value="less than 1">Less than 1 hour</option>
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "hour" : "hours"}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-2">
@@ -1455,12 +1584,19 @@ const VisualPerceptionForm: React.FC = () => {
                 >
                   Duration (in hours)
                 </label>
-                <input
-                  type="number"
-                  id="durationHome"
-                  placeholder="Enter duration of screen use"
+                <select
+                  data-role="durationHome"
                   className="w-full px-3 py-2 border border-input-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
+                >
+                  <option value="">Select duration</option>
+                  <option value="0">0 hours</option>
+                  <option value="less than 1">Less than 1 hour</option>
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "hour" : "hours"}
+                    </option>
+                  ))}
+                </select>
 
                 <label className="block text-sm font-medium text-gray-700">
                   Medium of Exposure

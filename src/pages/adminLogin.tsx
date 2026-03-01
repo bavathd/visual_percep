@@ -28,6 +28,11 @@ const AdminLogin = () => {
         onSubmit={loginHandler}
         className="p-6 bg-white rounded-md shadow-md space-y-4 w-80"
       >
+        <img
+          src="/logo(1).png"
+          alt="Admin Login Background"
+          className="w-full h-32 object-contain mb-4"
+        />
         <h2 className="text-xl font-bold text-center">Admin Login</h2>
 
         <input

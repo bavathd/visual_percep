@@ -1272,6 +1272,8 @@ const VisualPerceptionForm: React.FC = () => {
                       <option>Married</option>
                       <option>Divorced</option>
                       <option>Separated</option>
+                      <option>widow</option>
+                      <option>widower</option>
                     </select>
                   </div>
 

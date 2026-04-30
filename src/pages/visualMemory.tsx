@@ -124,7 +124,7 @@ const inCorrectImage = [
 ];
 
 const VisualMemory: React.FC = () => {
-  const [level, setLevel] = useState(0);
+  const [level, setLevel] = useState<number>(0);
   const [showFlash, setShowFlash] = useState(true);
   const [images, setImages] = useState<GameImage[]>([]);
   const [correct, setCorrect] = useState<number>(0);
@@ -185,27 +185,20 @@ const VisualMemory: React.FC = () => {
   }, [level]);
 
   const handleClick = (id: number) => {
-    setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
-    );
-
     const selected = images.find((img) => img.id === id);
-    if (selected?.isCorrect) {
-      setCorrect(1);
-    }
-    const durationMs = stopLevelTimer(); // returns ms
-    console.log(`⏱️ Time taken for level ${level}: ${durationMs} ms`);
-    console.log(`✅ Level ${level + 1}`);
-    if (!vid) {
-      return (
-        <div className="p-10 text-center text-xl font-bold">
-          Checking VPD ID...
-        </div>
-      );
-    }
+    const isCorrect = selected?.isCorrect ? 1 : 0;
+
+    setImages((prev) =>
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img)),
+    );
+    setCorrect(isCorrect); // only if you display it somewhere; otherwise drop it
+
+    const durationMs = stopLevelTimer();
+
     if (level >= 2) {
-      saveScore(vid, "Visual Memory", level + 1 - 2, correct, durationMs);
+      saveScore(vid!, "Visual Memory", level + 1 - 2, isCorrect, durationMs);
     }
+
     nextLevel();
   };
 
@@ -252,24 +245,25 @@ const VisualMemory: React.FC = () => {
 
         {/* Option Images */}
         {!showFlash && (
-          <div className="flex justify-center items-center w-full gap-6 mt-4">
+          <div className="flex justify-center items-center w-full gap-4 mt-4 px-2">
             {images.map(({ id, src, clicked }) => (
               <div
                 key={id}
                 onClick={() => handleClick(id)}
                 className={`
-              bg-white rounded-xl shadow-xl cursor-pointer 
-              transition-all duration-300 
-              hover:scale-110 
-              ${clicked ? "opacity-50" : ""}
-            `}
+          bg-white rounded-xl shadow-xl cursor-pointer 
+          transition-all duration-300 
+          hover:scale-105
+          ${clicked ? "opacity-50" : ""}
+        `}
                 style={{
-                  width: "250px",
-                  height: "500px",
+                  flex: "1 1 0",
+                  maxWidth: "420px",
+                  aspectRatio: "16 / 10",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  padding: "10px",
+                  padding: "12px",
                 }}
               >
                 <img

@@ -180,7 +180,7 @@ const VisualDiscrimination: React.FC = () => {
     const newCorrect = selected?.isCorrect ? correct + 1 : correct;
 
     setImages((prev) =>
-      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img))
+      prev.map((img) => (img.id === id ? { ...img, clicked: true } : img)),
     );
 
     if (selected?.isCorrect) {
@@ -199,7 +199,7 @@ const VisualDiscrimination: React.FC = () => {
         "Visual Discrimination",
         level + 1 - 2,
         newCorrect,
-        durationMs
+        durationMs,
       );
     }
 
@@ -245,29 +245,28 @@ const VisualDiscrimination: React.FC = () => {
             <img
               src={baseUrl + flashImage[level]}
               alt="Flash"
-              className="max-w-[30%] h-auto object-contain rounded shadow-xl"
+              className="max-h-[30vh] w-auto object-contain rounded shadow-xl"
             />
           </div>
-
           {/* Options (Bottom Row) */}
-          <div className="flex justify-center items-center w-full gap-6 mt-4">
+          <div className="flex justify-center items-center w-full gap-4 mt-4 px-2">
             {images.map(({ id, src, clicked }) => (
               <div
                 key={id}
                 onClick={() => handleClick(id)}
                 className={`
-              bg-white rounded-xl shadow-xl cursor-pointer 
-              transition-all duration-300 
-              hover:scale-110 
-              ${clicked ? "opacity-50" : ""}
-            `}
+                          bg-white rounded-xl shadow-xl cursor-pointer 
+                          transition-all duration-300 
+                          hover:scale-105
+                          ${clicked ? "opacity-50" : ""}
+                        `}
                 style={{
-                  width: "250px",
-                  height: "500px",
+                  flex: "1 1 0",
+                  aspectRatio: "16 / 10",
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  padding: "10px",
+                  padding: "12px",
                 }}
               >
                 <img

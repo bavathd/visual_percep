@@ -45,15 +45,15 @@ const DomainSection: React.FC<DomainSectionProps> = ({ title, items }) => {
                   item.correct === null
                     ? "text-gray-600"
                     : item.correct
-                    ? "text-green-600 font-bold"
-                    : "text-red-600 font-bold"
+                      ? "text-green-600 font-bold"
+                      : "text-red-600 font-bold"
                 }
               >
                 {item.correct === null
                   ? "-"
                   : item.correct
-                  ? "Correct"
-                  : "Wrong"}
+                    ? "Correct"
+                    : "incorrect"}
               </span>
             </div>
 
@@ -98,7 +98,7 @@ const ScoreCard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [data, setData] = useState<ScoreItem[][]>(
-    domains.map(() => generateEmptyItems())
+    domains.map(() => generateEmptyItems()),
   );
 
   // =========================================================
@@ -118,7 +118,7 @@ const ScoreCard: React.FC = () => {
       const today = new Date().toISOString().split("T")[0];
       const firestoreData = (await getScoresByDate(
         id,
-        today
+        today,
       )) as FirestoreScoreData;
 
       if (!firestoreData) {
@@ -163,7 +163,11 @@ const ScoreCard: React.FC = () => {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("Digitalized Comprehensive Visual Perception Score Card", 14, 20);
+    doc.text(
+      "Digitalized Comprehensive Visual Perception-Children Score Card",
+      14,
+      20,
+    );
 
     doc.setFontSize(12);
     doc.text(`VPD ID: ${vpdId}`, 14, 30);
@@ -179,7 +183,7 @@ const ScoreCard: React.FC = () => {
 
     autoTable(doc, {
       startY: 50,
-      head: [["Domain", "Correct", "Total Time"]],
+      head: [["Domain", "Response Score", "Total Time"]],
       body: summaryRows,
     });
 
@@ -189,17 +193,17 @@ const ScoreCard: React.FC = () => {
     domains.forEach((domain, domainIndex) => {
       doc.addPage();
       doc.setFontSize(16);
-      doc.text(`${domain} — Level Details`, 14, 20);
+      doc.text(`${domain} Domain Scores`, 14, 20);
 
       const levelRows = data[domainIndex].map((item) => [
         item.itemNo,
-        item.correct === null ? "-" : item.correct ? "Correct" : "Wrong",
+        item.correct === null ? "-" : item.correct ? "Correct" : "incorrect",
         item.responseTime !== null ? item.responseTime : "-",
       ]);
 
       autoTable(doc, {
         startY: 30,
-        head: [["Level", "Correct", "Response Time (ms)"]],
+        head: [["Item", "Response Score", "Response Time (ms)"]],
         body: levelRows,
       });
     });
@@ -240,7 +244,7 @@ const ScoreCard: React.FC = () => {
     // =========================================================
     doc.addPage();
     doc.setFontSize(18);
-    doc.text("Appendix 2 — Raw & Time Scores", 14, 20);
+    doc.text("Raw Scores", 14, 20);
 
     const appendixTableRows = [
       ["VISUAL FOUNDATION SKILLS", "", "", "", ""],
@@ -248,40 +252,58 @@ const ScoreCard: React.FC = () => {
         const items = data[idx];
         const correct = items.filter((i) => i.correct).length;
         const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
-        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+        return [
+          domains[idx],
+          `${correct}/10`,
+          `10`,
+          (correct / 10).toFixed(3),
+          time,
+        ];
       }),
       [
-        "FOUNDATION TOTAL",
+        "VISUAL FOUNDATION SKILLS TOTAL",
         fTotal.correct,
         fTotal.total,
         (fTotal.correct / fTotal.total).toFixed(3),
         fTotal.time,
       ],
 
-      ["OBJECT-BASED VISUAL SKILLS", "", "", "", ""],
+      ["OBJECT-BASED VISUAL PERCEPTION SKILLS", "", "", "", ""],
       ...objectBased.map((idx) => {
         const items = data[idx];
         const correct = items.filter((i) => i.correct).length;
         const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
-        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+        return [
+          domains[idx],
+          `${correct}/10`,
+          `10`,
+          (correct / 10).toFixed(3),
+          time,
+        ];
       }),
       [
-        "OBJECT-BASED TOTAL",
+        "OBJECT-BASED VISUAL PERCEPTION SKILLS TOTAL",
         oTotal.correct,
         oTotal.total,
         (oTotal.correct / oTotal.total).toFixed(3),
         oTotal.time,
       ],
 
-      ["SPACE & MOTION VISUAL SKILLS", "", "", "", ""],
+      ["SPACE & MOTION VISUAL PERCEPTION SKILLS", "", "", "", ""],
       ...spaceMotion.map((idx) => {
         const items = data[idx];
         const correct = items.filter((i) => i.correct).length;
         const time = items.reduce((sum, a) => sum + (a.responseTime || 0), 0);
-        return [domains[idx], correct, 10, (correct / 10).toFixed(3), time];
+        return [
+          domains[idx],
+          `${correct}/10`,
+          `10`,
+          (correct / 10).toFixed(3),
+          time,
+        ];
       }),
       [
-        "SPACE & MOTION TOTAL",
+        "SPACE & MOTION VISUAL PERCEPTION SKILLS TOTAL",
         sTotal.correct,
         sTotal.total,
         (sTotal.correct / sTotal.total).toFixed(3),
@@ -292,7 +314,7 @@ const ScoreCard: React.FC = () => {
       // GRAND TOTAL
       // ======================
       [
-        "Visual Perception Total Score",
+        "DCVPA-C Total Score",
         grandCorrect,
         grandTotal,
         grandAccuracy,
@@ -302,9 +324,79 @@ const ScoreCard: React.FC = () => {
 
     autoTable(doc, {
       startY: 35,
-      head: [["Domain", "Correct", "Total", "Accuracy", "Time (ms)"]],
+      head: [
+        ["Domain", "Response Score", "Total Score", "Accuracy", "Time (ms)"],
+      ],
       body: appendixTableRows,
-      styles: { fontSize: 10 },
+
+      theme: "grid",
+
+      styles: {
+        fontSize: 10,
+        cellPadding: 3,
+        lineWidth: 0.2,
+        lineColor: [180, 180, 180],
+        valign: "middle",
+      },
+
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: "bold",
+        halign: "center",
+      },
+
+      didParseCell: (hookData) => {
+        if (hookData.section !== "body") return;
+
+        const rowTitle = String(hookData.row.cells[0].raw);
+
+        const sectionHeaders = [
+          "VISUAL FOUNDATION SKILLS",
+          "OBJECT-BASED VISUAL PERCEPTION SKILLS",
+          "SPACE & MOTION VISUAL PERCEPTION SKILLS",
+        ];
+
+        const totals = [
+          "VISUAL FOUNDATION SKILLS TOTAL",
+          "OBJECT-BASED VISUAL PERCEPTION SKILLS TOTAL",
+          "SPACE & MOTION VISUAL PERCEPTION SKILLS TOTAL",
+        ];
+
+        // ------------------------------
+        // SECTION HEADERS
+        // ------------------------------
+        if (sectionHeaders.includes(rowTitle)) {
+          hookData.cell.styles.fontStyle = "bold";
+          hookData.cell.styles.fontSize = 11;
+          hookData.cell.styles.fillColor = [220, 230, 241];
+          hookData.cell.styles.textColor = [0, 0, 0];
+
+          if (hookData.column.index > 0) {
+            hookData.cell.text = [""];
+            hookData.cell.styles.fillColor = [220, 230, 241];
+          }
+        }
+
+        // ------------------------------
+        // TOTAL ROWS
+        // ------------------------------
+        if (totals.includes(rowTitle)) {
+          hookData.cell.styles.fontStyle = "bold";
+          hookData.cell.styles.fillColor = [242, 242, 242];
+          hookData.cell.styles.textColor = [0, 0, 0];
+        }
+
+        // ------------------------------
+        // GRAND TOTAL
+        // ------------------------------
+        if (rowTitle === "DCVPA-C Total Score") {
+          hookData.cell.styles.fontStyle = "bold";
+          hookData.cell.styles.fontSize = 11;
+          hookData.cell.styles.fillColor = [255, 235, 156];
+          hookData.cell.styles.textColor = [0, 0, 0];
+        }
+      },
     });
 
     // =========================================================
@@ -331,7 +423,7 @@ const ScoreCard: React.FC = () => {
       </div>
 
       <h1 className="text-3xl font-bold mb-6 text-center">
-        Digitalized Comprehensive Visual Perception Score Card
+        Digitalized Comprehensive Visual Perception-Children Score Card
       </h1>
 
       {domains.map((domain, i) => (
@@ -403,15 +495,13 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
 
   return (
     <div className="p-6 bg-white shadow rounded-2xl mt-8">
-      <h2 className="text-2xl font-bold mb-4">
-        Appendix 2 — Raw & Time Scores
-      </h2>
+      <h2 className="text-2xl font-bold mb-4">Raw & Time Scores</h2>
 
       <table className="w-full border text-left">
         <thead className="bg-gray-200">
           <tr>
             <th className="p-2">Domain</th>
-            <th className="p-2 text-center">Correct</th>
+            <th className="p-2 text-center">Response Score</th>
             <th className="p-2 text-center">Total Items</th>
             <th className="p-2 text-center">Accuracy</th>
             <th className="p-2 text-center">Total Time (milli sec)</th>
@@ -517,7 +607,7 @@ const AppendixTwo: React.FC<AppendixProps> = ({ data, domains }) => {
             <td className="p-2 text-center">{spaceTotals.time}</td>
           </tr>
           <tr className="font-bold bg-yellow-100">
-            <td className="p-2">Visual Perception Total Score</td>
+            <td className="p-2">DCVPA-C Total Score</td>
             <td className="p-2 text-center">{grandCorrect}</td>
             <td className="p-2 text-center">{grandTotal}</td>
             <td className="p-2 text-center">{grandAccuracy}</td>

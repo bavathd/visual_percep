@@ -26,7 +26,7 @@ const Home: React.FC = () => {
             ← Back
           </button>
 
-          <h1 className="text-xl font-semibold">User Data Dashboard</h1>
+          <h1 className="text-xl font-semibold">Dashboard</h1>
 
           <a
             href={DASHBOARD_URL}
@@ -81,8 +81,8 @@ const Home: React.FC = () => {
           </p>
 
           <p className="mt-3 text-gray-500 max-w-2xl mx-auto">
-            Welcome to the DCVPA portal. Please choose one of the options below
-            to continue.
+            Welcome to the DCVPA-C portal. Please choose one of the options
+            below to continue.
           </p>
         </div>
 
@@ -117,7 +117,7 @@ const Home: React.FC = () => {
           >
             <div className="text-6xl mb-6">📊</div>
 
-            <h2 className="text-3xl font-bold mb-3">User Data</h2>
+            <h2 className="text-3xl font-bold mb-3">Dashboard</h2>
 
             <p className="text-gray-600 mb-8">
               View participant records, reports, analytics and assessment

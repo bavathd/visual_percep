@@ -19,3 +19,55 @@ body,
 
 .animation-delay-2000 { animation-delay: 2s; }
 .animation-delay-4000 { animation-delay: 4s; }
+
+@keyframes float {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  25% {
+    transform: translate(25px, -20px) scale(1.05);
+  }
+
+  50% {
+    transform: translate(0px, -40px) scale(1);
+  }
+
+  75% {
+    transform: translate(-25px, -15px) scale(0.95);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-float {
+  animation: float 12s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  25% {
+    transform: translate(25px, -20px) scale(1.05);
+  }
+
+  50% {
+    transform: translate(0px, -40px) scale(1);
+  }
+
+  75% {
+    transform: translate(-25px, -15px) scale(0.95);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-float {
+  animation: float 12s ease-in-out infinite;
+}

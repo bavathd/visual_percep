@@ -75,7 +75,7 @@ const AdminLogin = () => {
         </h1>
 
         <p className="text-center text-slate-500 mt-2 mb-8">
-          Digital Comprehensive Visual Perception Assessment - Children
+          Digitalized Comprehensive Visual Perception Assessment - Children
         </p>
 
         {/* Email */}

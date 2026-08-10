@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import instructionsPdf from "../assets/Instructions.pdf";
 
 const DASHBOARD_URL = "https://dashboard-visual-o7vv.onrender.com/";
 
@@ -84,6 +85,15 @@ const Home: React.FC = () => {
             Welcome to the DCVPA-C portal. Please choose one of the options
             below to continue.
           </p>
+
+          <a
+            href={instructionsPdf}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-5 inline-block text-blue-600 hover:text-blue-800 hover:underline font-medium"
+          >
+            📄 View Instructions
+          </a>
         </div>
 
         {/* Cards */}
